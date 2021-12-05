@@ -1,4 +1,7 @@
 from .tracking.face import LayertubeTracker
 
 
-LayertubeTracker()
+tracker = LayertubeTracker()
+
+while True:
+    tracker.loop()

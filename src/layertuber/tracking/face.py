@@ -7,9 +7,12 @@ class LayertubeTracker:
     tracker: Tracker
 
     def __init__(self) -> None:
-        self.reader = InputReader()
-        self.tracker = Tracker()
+        width = 800
+        height = 600
+        self.reader = InputReader(capture='0', raw_rgb=False, width=width, height=height, fps=30)
+        self.tracker = Tracker(width, height)
 
     def loop(self) -> None:
+        print('looping')
         from time import sleep
-        sleep(.1)
+        sleep(.2)
