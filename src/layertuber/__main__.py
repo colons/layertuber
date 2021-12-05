@@ -3,5 +3,5 @@ from .tracking.face import LayertubeTracker
 
 tracker = LayertubeTracker()
 
-while True:
+while tracker.reader.is_open():
     tracker.loop()
