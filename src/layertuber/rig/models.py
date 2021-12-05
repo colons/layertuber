@@ -30,7 +30,6 @@ class Rig:
         frame.fill(0)
 
         if face.eye_blink is not None:
-            print(face.eye_blink)
             lblink, rblink = face.eye_blink
             draw_dot_on_frame(frame, PINK, 3, lblink * RENDER_WIDTH, 10)
             draw_dot_on_frame(frame, PINK, 3, rblink * RENDER_WIDTH, 20)
