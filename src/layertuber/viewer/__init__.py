@@ -24,7 +24,11 @@ class Viewer:
         self.screen = pygame.display.set_mode(self.rig.target_size)
 
     def render(self, face: FaceInfo) -> None:
-        self.screen.blits([(layer.image, layer.position) for layer in self.rig.layers[::-1]], False)
+        self.screen.blits([
+            (layer.image, layer.position)
+            for layer in self.rig.layers[::-1]
+            if layer.visible
+        ], False)
 
     def begin_loop(self) -> None:
         while self.tracker.reader.is_open():

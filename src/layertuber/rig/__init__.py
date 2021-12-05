@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import os
+from configparser import ConfigParser
+from distutils.util import strtobool
 from typing import List, Tuple
 
 from PIL.Image import Image
@@ -17,10 +20,18 @@ class Rig:
     project: Project
     layers: List[Layer]
     target_size: Tuple[int, int]
+    config: ConfigParser
 
     def __init__(self, ora_path: str, max_size: Tuple[int, int]):
+        # this should probably be yaml and maybe camel; this structure sucks and section names are case-insensitive
+        self.config = ConfigParser()
+        self.config.read(f"{os.path.splitext(ora_path)[0]}.layertuber.ini")
+
         self.project = Project.load(ora_path)
         self.layers = []
+
+        seen_names = set()
+
         self.target_size = target_dimensions(max_size, self.project.dimensions)
 
         for layer in self.project.children_recursive:
@@ -28,12 +39,20 @@ class Rig:
             if layer.type == TYPE_LAYER:
                 self.layers.append(Layer(self, layer))
 
+            if layer.name in seen_names:
+                raise RuntimeError(
+                    f'this file has a duplicate layer named {layer.name!r}. '
+                    'please rename your layers so that they are unique'
+                )
+            seen_names.add(layer.name)
+
 
 class Layer(Sprite):
     image: Surface
     uuid: str
     name: str
     position: Tuple[float, float] = 0., 0.
+    forced_invisible: bool = False
 
     def __init__(self, rig: Rig, pyora_layer: PyoraLayer) -> None:
         pil_image: Image = pyora_layer.get_image_data(raw=False)
@@ -42,4 +61,8 @@ class Layer(Sprite):
         self.name = pyora_layer.name
         self.uuid = pyora_layer.uuid
 
-        print(f"{self.uuid} {self.name}")
+        self.forced_invisible = not strtobool(rig.config.get(self.name.lower(), 'visible', fallback='true'))
+
+    @property
+    def visible(self) -> bool:
+        return (not self.forced_invisible)
