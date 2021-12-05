@@ -15,7 +15,7 @@ REQUEST_INPUT_WIDTH = 800
 REQUEST_INPUT_HEIGHT = 600
 
 
-class LayertubeTracker:
+class FaceTracker:
     reader: InputReader
     tracker: Tracker
     height: int
@@ -43,7 +43,7 @@ class LayertubeTracker:
         faces: List[FaceInfo] = self.tracker.predict(input_frame)
 
         if not faces:
-            return
+            return None
 
         face, = faces  # we only allow one
 

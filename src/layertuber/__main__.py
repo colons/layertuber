@@ -1,12 +1,11 @@
-from .rig.models import Rig
-from .tracking.face import LayertubeTracker
+from sys import argv
+
+from .rig import Rig
+from .tracking.face import FaceTracker
+from .viewer import Viewer
 
 
-rig = Rig()
-tracker = LayertubeTracker()
-
-
-while tracker.reader.is_open():
-    face = tracker.get_face()
-    if face is not None:
-        rig.render(face)
+Viewer(
+    Rig(argv[-1], (800, 600)),
+    FaceTracker(),
+).begin_loop()
