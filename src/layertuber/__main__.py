@@ -1,1 +1,4 @@
-raise NotImplementedError('this should be the app entry point')
+from .tracking.face import LayertubeTracker
+
+
+LayertubeTracker()
