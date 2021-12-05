@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import List
 
 
 @dataclass
@@ -11,7 +12,7 @@ class Rig:
 
 @dataclass
 class Layer:
-    image: bin
+    image: bytes
 
 
 @dataclass
