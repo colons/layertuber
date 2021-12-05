@@ -1,0 +1,3 @@
+[submodule "src/vendor/OpenSeeFace"]
+	path = src/vendor/OpenSeeFace
+	url = https://github.com/emilianavt/OpenSeeFace.git
