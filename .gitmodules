@@ -1,3 +1,6 @@
 [submodule "src/vendor/OpenSeeFace"]
-	path = src/vendor/OpenSeeFace
+	path = src/layertuber/vendor/OpenSeeFace
+	url = https://github.com/emilianavt/OpenSeeFace.git
+[submodule "src/layertuber/vendor/OpenSeeFace"]
+	path = src/layertuber/vendor/OpenSeeFace
 	url = https://github.com/emilianavt/OpenSeeFace.git
