@@ -2,7 +2,7 @@ from typing import Dict, Literal, Tuple, TypedDict, Union
 
 
 FloatFromTrackingReport = Union[Literal['left_blink', 'right_blink']]
-Vec2FromTrackingReport = Union[Literal['face_position']]
+Vec2FromTrackingReport = Union[Literal['face_position', 'left_gaze', 'right_gaze']]
 
 
 class TrackingReport(TypedDict):

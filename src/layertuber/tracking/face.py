@@ -65,6 +65,7 @@ class FaceTracker:
         if face is None:
             return None
 
+        size = (self.width, self.height)
         eye_blink = face.eye_blink or (1, 1)
 
         return dict(
@@ -73,6 +74,8 @@ class FaceTracker:
                 right_blink=eye_blink[1],
             ),
             vec2s=dict(
-                face_position=px_to_center_offset_2d(flip(*face.coord), (self.width, self.height)),
+                face_position=px_to_center_offset_2d(flip(*face.coord), size),
+                left_gaze=px_to_center_offset_2d(flip(*face.eye_state[0][1:3]), size),
+                right_gaze=px_to_center_offset_2d(flip(*face.eye_state[1][1:3]), size),
             )
         )

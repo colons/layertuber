@@ -18,7 +18,7 @@ class ThresholdConfig(BaseModel):
 
 class Vec2ScaledConfig(BaseModel):
     option: Vec2FromTrackingReport
-    scale: float
+    scale: float = 1
 
 
 class LayerConfig(BaseModel):

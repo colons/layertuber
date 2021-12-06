@@ -14,6 +14,9 @@ layers:
     visible_when:
       option: right_blink
       greater_than: 0.8
+    follow:
+      option: left_gaze
+      scale: 0.2
 
   eye l closed:
     invisible_when:
@@ -23,10 +26,14 @@ layers:
     visible_when:
       option: left_blink
       greater_than: 0.8
+
   pupil l:
     visible_when:
       option: left_blink
       greater_than: 0.8
+    follow:
+      option: left_gaze
+      scale: 0.2
 
   head:
     follow:
