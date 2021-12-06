@@ -24,8 +24,6 @@ class Viewer:
         self.screen = pygame.display.set_mode(self.rig.target_size)
 
     def render(self, report: TrackingReport) -> None:
-        print((report['left_blink']))
-
         for layer in self.rig.layers:
             layer.update_from_report(report)
 

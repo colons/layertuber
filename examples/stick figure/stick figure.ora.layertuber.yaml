@@ -1,0 +1,29 @@
+layers:
+  Background:
+    visible: false
+
+  eye r closed:
+    invisible_when:
+      option: right_blink
+      greater_than: 0.8
+  eye r open:
+    visible_when:
+      option: right_blink
+      greater_than: 0.8
+  pupil r:
+    visible_when:
+      option: right_blink
+      greater_than: 0.8
+
+  eye l closed:
+    invisible_when:
+      option: left_blink
+      greater_than: 0.8
+  eye l open:
+    visible_when:
+      option: left_blink
+      greater_than: 0.8
+  pupil l:
+    visible_when:
+      option: left_blink
+      greater_than: 0.8
