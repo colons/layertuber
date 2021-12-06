@@ -46,7 +46,11 @@ layers:
       option: face_position
       scale: 1
 
-  head:
+  head bg:
+    follow:
+      option: face_position
+      scale: 1
+  head outline:
     follow:
       option: face_position
       scale: 1
