@@ -28,7 +28,7 @@ class Rig:
     config: RigConfig
 
     def __init__(self, ora_path: str, max_size: Tuple[int, int]):
-        with open(f"{ora_path}.layertuber.yaml") as rig_config_file:
+        with open(f'{ora_path}.layertuber.yaml') as rig_config_file:
             self.config = RigConfig.parse_obj(yaml.load(rig_config_file, yaml.Loader))
 
         self.project = Project.load(ora_path)
