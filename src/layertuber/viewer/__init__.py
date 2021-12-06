@@ -24,6 +24,9 @@ class Viewer:
         self.screen = pygame.display.set_mode(self.rig.target_size)
 
     def render(self, report: TrackingReport) -> None:
+        for group in self.rig.groups:
+            group.update_from_report(report)
+
         for layer in self.rig.layers:
             layer.update_from_report(report)
 
