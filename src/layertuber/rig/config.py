@@ -5,12 +5,14 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel
 
+from ..tracking.model import FloatFromTrackingReport
+
 
 logger = logging.getLogger('config')
 
 
 class ThresholdConfig(BaseModel):
-    option: str  # it'd be nice to verify these are present in TrackingReport; enum?
+    option: FloatFromTrackingReport
     greater_than: float
 
 

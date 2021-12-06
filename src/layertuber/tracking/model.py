@@ -1,6 +1,8 @@
-from typing import TypedDict
+from typing import Dict, Literal, Union
 
 
-class TrackingReport(TypedDict):
-    left_blink: float
-    right_blink: float
+FloatFromTrackingReport = Union[Literal["left_blink", "right_blink"]]
+
+
+class TrackingReport(Dict[FloatFromTrackingReport, float]):
+    pass
