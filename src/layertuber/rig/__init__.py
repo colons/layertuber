@@ -86,7 +86,11 @@ class Layer(Sprite):
 
     def update_from_report(self, report: TrackingReport) -> None:
         if self.config.visible_when is not None:
-            self.visible = report[self.config.visible_when.option] > self.config.visible_when.greater_than
+            self.visible = (
+                report['floats'][self.config.visible_when.option] > self.config.visible_when.greater_than
+            )
 
         if self.config.invisible_when is not None:
-            self.visible = not (report[self.config.invisible_when.option] > self.config.invisible_when.greater_than)
+            self.visible = not (
+                report['floats'][self.config.invisible_when.option] > self.config.invisible_when.greater_than
+            )

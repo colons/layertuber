@@ -64,7 +64,9 @@ class FaceTracker:
         if face is None:
             return None
 
-        return TrackingReport(
-            left_blink=face.eye_blink[0],
-            right_blink=face.eye_blink[1],
+        return dict(
+            floats=dict(
+                left_blink=face.eye_blink[0],
+                right_blink=face.eye_blink[1],
+            )
         )
