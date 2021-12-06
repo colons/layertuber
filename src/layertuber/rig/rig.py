@@ -57,10 +57,13 @@ class Rig:
                 if not layer.config.visible:
                     continue
                 self.layers.append(layer)
-                if pyora_layer.parent is not None:
-                    layer_group = groups_by_uuid.get(pyora_layer.parent.uuid)
+                parent = pyora_layer.parent
+                while parent is not None:
+                    layer_group = groups_by_uuid.get(parent.uuid)
                     if layer_group is not None:
                         layer.add(layer_group)
+                    parent = parent.parent
+
             if pyora_layer.name in seen_names:
                 raise RuntimeError(
                     f'this file has a duplicate layer named {pyora_layer.name!r}. '

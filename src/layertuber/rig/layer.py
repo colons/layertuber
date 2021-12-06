@@ -24,7 +24,7 @@ C = TypeVar('C', bound='ConfigurableThing')
 class ConfigurableThing(ABC):
     uuid: str
     name: str
-    position: Tuple[float, float] = 0., 0.
+    position: Tuple[float, float] = (0., 0.)
     forced_invisible: bool = False
     visible: bool = True
     config: LayerConfig
