@@ -75,11 +75,15 @@ class Layer(Sprite):
     forced_invisible: bool = False
     visible: bool = True
     config: LayerConfig
+    rig: Rig
 
     def __init__(self, rig: Rig, pyora_layer: PyoraLayer) -> None:
+        self.rig = rig
+
         pil_image: Image = pyora_layer.get_image_data(raw=False)
-        pil_image = pil_image.resize(rig.target_size)
+        pil_image = pil_image.resize(self.rig.target_size)
         self.image = frombuffer(pil_image.tobytes(), rig.target_size, 'RGBA')
+
         self.name = pyora_layer.name
         self.uuid = pyora_layer.uuid
         self.config = rig.config.layers.get(self.name) or LayerConfig()
@@ -93,4 +97,11 @@ class Layer(Sprite):
         if self.config.invisible_when is not None:
             self.visible = not (
                 report['floats'][self.config.invisible_when.option] > self.config.invisible_when.greater_than
+            )
+
+        if self.config.follow is not None:
+            centre_offset = report['vec2s'][self.config.follow.option]
+            self.position = (
+                centre_offset[0] * self.config.follow.scale * self.rig.target_size[0],
+                centre_offset[1] * self.config.follow.scale * self.rig.target_size[1],
             )

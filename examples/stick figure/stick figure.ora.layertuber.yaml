@@ -6,24 +6,47 @@ layers:
     invisible_when:
       option: right_blink
       greater_than: 0.8
+    follow:
+      option: face_position
+      scale: 1
   eye r open:
     visible_when:
       option: right_blink
       greater_than: 0.8
+    follow:
+      option: face_position
+      scale: 1
   pupil r:
     visible_when:
       option: right_blink
       greater_than: 0.8
+    follow:
+      option: face_position
+      scale: 1
 
   eye l closed:
     invisible_when:
       option: left_blink
       greater_than: 0.8
+    follow:
+      option: face_position
+      scale: 1
   eye l open:
     visible_when:
       option: left_blink
       greater_than: 0.8
+    follow:
+      option: face_position
+      scale: 1
   pupil l:
     visible_when:
       option: left_blink
       greater_than: 0.8
+    follow:
+      option: face_position
+      scale: 1
+
+  head:
+    follow:
+      option: face_position
+      scale: 1

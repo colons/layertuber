@@ -5,6 +5,7 @@ from typing import List, Optional
 import cv2
 
 from .model import TrackingReport
+from .utils import flip, px_to_center_offset_2d
 from ..utils.cv import PINK, draw_dot_on_frame
 from ..vendor.OpenSeeFace.input_reader import InputReader
 from ..vendor.OpenSeeFace.tracker import FaceInfo, Tracker
@@ -24,7 +25,7 @@ class FaceTracker:
 
     def __init__(self) -> None:
         self.reader = InputReader(
-            capture=0, raw_rgb=False, width=REQUEST_INPUT_WIDTH, height=REQUEST_INPUT_HEIGHT, fps=30
+            capture=4, raw_rgb=False, width=REQUEST_INPUT_WIDTH, height=REQUEST_INPUT_HEIGHT, fps=30
         )
 
         ret, frame = self.reader.read()
@@ -68,5 +69,8 @@ class FaceTracker:
             floats=dict(
                 left_blink=face.eye_blink[0],
                 right_blink=face.eye_blink[1],
+            ),
+            vec2s=dict(
+                face_position=px_to_center_offset_2d(flip(*face.coord), (self.width, self.height)),
             )
         )
