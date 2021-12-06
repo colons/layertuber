@@ -5,7 +5,7 @@ import pygame
 
 from ..rig import Rig
 from ..tracking.face import FaceTracker
-from ..vendor.OpenSeeFace.tracker import FaceInfo
+from ..tracking.model import TrackingReport
 
 
 logger = getLogger('viewer')
@@ -23,7 +23,12 @@ class Viewer:
     def __post_init__(self) -> None:
         self.screen = pygame.display.set_mode(self.rig.target_size)
 
-    def render(self, face: FaceInfo) -> None:
+    def render(self, report: TrackingReport) -> None:
+        print((report['left_blink']))
+
+        for layer in self.rig.layers:
+            layer.update_from_report(report)
+
         self.screen.blits([
             (layer.image, layer.position)
             for layer in self.rig.layers[::-1]
@@ -34,8 +39,8 @@ class Viewer:
         while self.tracker.reader.is_open():
             self.screen.fill(pygame.color.Color(0, 255, 0))
 
-            face = self.tracker.get_face()
-            if face is not None:
-                self.render(face)
+            report = self.tracker.get_report()
+            if report is not None:
+                self.render(report)
 
             pygame.display.flip()

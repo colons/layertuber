@@ -4,6 +4,7 @@ from typing import List, Optional
 
 import cv2
 
+from .model import TrackingReport
 from ..utils.cv import PINK, draw_dot_on_frame
 from ..vendor.OpenSeeFace.input_reader import InputReader
 from ..vendor.OpenSeeFace.tracker import FaceInfo, Tracker
@@ -56,3 +57,14 @@ class FaceTracker:
             cv2.waitKey(1)
 
         return face
+
+    def get_report(self) -> Optional[TrackingReport]:
+        face = self.get_face()
+
+        if face is None:
+            return None
+
+        return TrackingReport(
+            left_blink=face.eye_blink[0],
+            right_blink=face.eye_blink[1],
+        )
