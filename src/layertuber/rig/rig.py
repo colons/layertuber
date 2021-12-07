@@ -30,7 +30,6 @@ class Rig:
         self.layers = []
         self.groups = []
 
-        seen_names = set()
         configured_layer_names = {layer_name for layer_name in self.config.layers.keys()}
 
         self.target_size = target_dimensions(max_size, self.project.dimensions)
@@ -63,14 +62,6 @@ class Rig:
                     if layer_group is not None:
                         layer.add(layer_group)
                     parent = parent.parent
-
-            if pyora_layer.name in seen_names:
-                raise RuntimeError(
-                    f'this file has a duplicate layer named {pyora_layer.name!r}. '
-                    'please rename your layers so that they are unique'
-                )
-
-            seen_names.add(pyora_layer.name)
 
         if configured_layer_names:
             logger.warning(
