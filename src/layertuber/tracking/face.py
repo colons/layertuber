@@ -23,9 +23,9 @@ class FaceTracker:
     height: int
     width: int
 
-    def __init__(self) -> None:
+    def __init__(self, capture: int = 0) -> None:
         self.reader = InputReader(
-            capture=4, raw_rgb=False, width=REQUEST_INPUT_WIDTH, height=REQUEST_INPUT_HEIGHT, fps=30
+            capture=capture, raw_rgb=False, width=REQUEST_INPUT_WIDTH, height=REQUEST_INPUT_HEIGHT, fps=30
         )
 
         ret, frame = self.reader.read()
