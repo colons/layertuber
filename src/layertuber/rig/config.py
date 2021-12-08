@@ -32,6 +32,7 @@ class LayerConfig(BaseModel):
     invisible_when: Optional[ThresholdConfig]
     follow: Optional[Vec2ScaledConfig]
     follow_facing_point: Optional[ScalarQuatConfig]
+    rotate_with: Optional[ScalarQuatConfig]
 
 
 class RigConfig(BaseModel):

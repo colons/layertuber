@@ -8,6 +8,7 @@ from PIL.Image import Image
 from pygame.image import frombuffer
 from pygame.sprite import Group, Sprite
 from pygame.surface import Surface
+from pygame.transform import rotate
 
 from pyora import Layer as PyoraLayer
 
@@ -31,6 +32,7 @@ class ConfigurableThing(ABC):
     visible: bool = True
     config: LayerConfig
     rig: Rig
+    angle: float = 0  # in degrees, since that's what pygame uses
 
     @classmethod
     def from_layer(cls: Type[C], rig: Rig, pyora_layer: PyoraLayer) -> C:
@@ -57,6 +59,7 @@ class ConfigurableThing(ABC):
 
     def update_position(self, report: TrackingReport) -> None:
         position = (0., 0.)
+        angle: float = 0
 
         if isinstance(self, Layer):
             for group in self.groups():
@@ -79,6 +82,15 @@ class ConfigurableThing(ABC):
                 position[1] + (y * self.config.follow_facing_point.scale * self.rig.minimum_dimension),
             )
 
+        if self.config.rotate_with is not None:
+            angle += report['rotations'][self.config.rotate_with.option].as_rotvec(degrees=True)[2]
+
+        if isinstance(self, Layer):
+            angle = angle + sum((g.angle for g in self.groups() if isinstance(g, LayerGroup)))
+            if angle != 0:
+                self.image = rotate(self.image, angle)
+
+        self.angle = angle
         self.position = position
 
     def update_from_report(self, report: TrackingReport) -> None:
@@ -91,6 +103,7 @@ class LayerGroup(Group, ConfigurableThing):
 
 
 class Layer(Sprite, ConfigurableThing):
+    original_image: Surface
     image: Surface
 
     @classmethod
@@ -98,5 +111,9 @@ class Layer(Sprite, ConfigurableThing):
         instance = super().from_layer(rig, pyora_layer)
         pil_image: Image = pyora_layer.get_image_data(raw=False)
         pil_image = pil_image.resize(rig.target_size)
-        instance.image = frombuffer(pil_image.tobytes(), rig.target_size, 'RGBA')
+        instance.original_image = frombuffer(pil_image.tobytes(), rig.target_size, 'RGBA')
         return instance
+
+    def update_position(self, report: TrackingReport) -> None:
+        self.image = self.original_image
+        super().update_position(report)

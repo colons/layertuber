@@ -6,6 +6,9 @@ layers:
     follow:
       option: face_position
       scale: 1
+    rotate_with:
+      option: head_rotation
+      scale: 1
 
   face:
     follow_facing_point:
