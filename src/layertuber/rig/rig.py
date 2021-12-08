@@ -20,6 +20,7 @@ class Rig:
     layers: List[Layer]
     groups: List[LayerGroup]
     target_size: Tuple[int, int]
+    minimum_dimension: int
     config: RigConfig
 
     def __init__(self, ora_path: str, max_size: Tuple[int, int]):
@@ -33,6 +34,7 @@ class Rig:
         configured_layer_names = {layer_name for layer_name in self.config.layers.keys()}
 
         self.target_size = target_dimensions(max_size, self.project.dimensions)
+        self.minimum_dimension = min(self.target_size)
         groups_by_uuid: Dict[str, LayerGroup] = {}
 
         # make groups

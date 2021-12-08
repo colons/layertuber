@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 
 C = TypeVar('C', bound='ConfigurableThing')
 
+FACING_POINT = (0, 0, 1)
+
 
 class ConfigurableThing(ABC):
     uuid: str
@@ -64,10 +66,18 @@ class ConfigurableThing(ABC):
         if self.config.follow is not None:
             centre_offset = report['vec2s'][self.config.follow.option]
             our_px = (
-                centre_offset[0] * self.config.follow.scale * self.rig.target_size[0],
-                centre_offset[1] * self.config.follow.scale * self.rig.target_size[1],
+                centre_offset[0] * self.config.follow.scale * self.rig.minimum_dimension,
+                centre_offset[1] * self.config.follow.scale * self.rig.minimum_dimension,
             )
             position = (position[0] + our_px[0], position[1] + our_px[1])
+
+        if self.config.follow_facing_point is not None:
+            rot = report['rotations'][self.config.follow_facing_point.option]
+            x, y, z = rot.apply(FACING_POINT)
+            position = (
+                position[0] + (x * self.config.follow_facing_point.scale * self.rig.minimum_dimension),
+                position[1] + (y * self.config.follow_facing_point.scale * self.rig.minimum_dimension),
+            )
 
         self.position = position
 

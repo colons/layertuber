@@ -5,6 +5,10 @@ def flip(y: float, x: float) -> Tuple[float, float]:
     return x, y
 
 
+def subtract(a: Tuple[float, float], b: Tuple[float, float]) -> Tuple[float, float]:
+    return (a[0] - b[0], a[1] - b[1])
+
+
 def px_to_center_offset(px: float, canvas: float) -> float:
     return (px / canvas) - 0.5
 

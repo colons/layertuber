@@ -4,8 +4,10 @@ from typing import List, Optional
 
 import cv2
 
+from scipy.spatial.transform import Rotation
+
 from .report import TrackingReport
-from .utils import flip, px_to_center_offset_2d
+from .utils import flip, px_to_center_offset_2d, subtract
 from ..utils.cv import PINK, draw_dot_on_frame
 from ..vendor.OpenSeeFace.input_reader import InputReader
 from ..vendor.OpenSeeFace.tracker import FaceInfo, Tracker
@@ -22,6 +24,7 @@ class FaceTracker:
     tracker: Tracker
     height: int
     width: int
+    neutral_report: TrackingReport
 
     def __init__(self, capture: int = 0) -> None:
         self.reader = InputReader(
@@ -35,6 +38,14 @@ class FaceTracker:
         logger.debug(f'w: {self.width}, h: {self.height}, c: {channels}')
 
         self.tracker = Tracker(self.width, self.height, silent=True)
+        self.calibrate()
+
+    def calibrate(self) -> None:
+        while True:
+            report = self.get_raw_report()
+            if report is not None:
+                self.neutral_report = report
+                break
 
     def get_face(self) -> Optional[FaceInfo]:
         ret, input_frame = self.reader.read()
@@ -59,7 +70,7 @@ class FaceTracker:
 
         return face
 
-    def get_report(self) -> Optional[TrackingReport]:
+    def get_raw_report(self) -> Optional[TrackingReport]:
         face = self.get_face()
 
         if face is None:
@@ -67,15 +78,33 @@ class FaceTracker:
 
         size = (self.width, self.height)
         eye_blink = face.eye_blink or (1, 1)
+        _blink, left_gaze_y, left_gaze_x, _confidence = face.eye_state[0]
+        _blink, right_gaze_y, right_gaze_x, _confidence = face.eye_state[1]
 
         return dict(
             floats=dict(
                 left_blink=eye_blink[0],
                 right_blink=eye_blink[1],
             ),
+            rotations=dict(
+                head_rotation=Rotation.from_quat(face.quaternion),
+            ),
             vec2s=dict(
                 face_position=px_to_center_offset_2d(flip(*face.coord), size),
-                left_gaze=px_to_center_offset_2d(flip(*face.eye_state[0][1:3]), size),
-                right_gaze=px_to_center_offset_2d(flip(*face.eye_state[1][1:3]), size),
-            )
+                left_gaze=px_to_center_offset_2d((left_gaze_x, left_gaze_y), size),
+                right_gaze=px_to_center_offset_2d((right_gaze_x, right_gaze_y), size),
+            ),
         )
+
+    def get_report(self) -> Optional[TrackingReport]:
+        report = self.get_raw_report()
+        if report is None:
+            return report
+
+        for vk, vv in report['vec2s'].items():
+            report['vec2s'][vk] = subtract(vv, self.neutral_report['vec2s'][vk])
+
+        for rk, rv in report['rotations'].items():
+            report['rotations'][rk] = (rv * self.neutral_report['rotations'][rk].inv())
+
+        return report

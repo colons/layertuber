@@ -8,9 +8,9 @@ layers:
       scale: 1
 
   face:
-    follow:
-      option: right_gaze  # it'd be nice to maybe follow, like, nose or something?
-      scale: 0.2
+    follow_facing_point:
+      option: head_rotation
+      scale: 0.1
 
   eye l closed:
     invisible_when:
@@ -24,9 +24,9 @@ layers:
     visible_when:
       option: left_blink
       greater_than: 0.8
-    follow:
-      option: left_gaze
-      scale: 0.1
+    follow_facing_point:
+      option: head_rotation
+      scale: 0.05
 
   eye r closed:
     invisible_when:
@@ -40,6 +40,6 @@ layers:
     visible_when:
       option: right_blink
       greater_than: 0.8
-    follow:
-      option: right_gaze
-      scale: 0.1
+    follow_facing_point:
+      option: head_rotation
+      scale: 0.05
