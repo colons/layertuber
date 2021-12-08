@@ -5,7 +5,7 @@ import pygame
 
 from ..rig import Rig
 from ..tracking.face import FaceTracker
-from ..tracking.model import TrackingReport
+from ..tracking.report import TrackingReport
 
 
 logger = getLogger('viewer')

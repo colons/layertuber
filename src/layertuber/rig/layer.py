@@ -12,7 +12,7 @@ from pygame.surface import Surface
 from pyora import Layer as PyoraLayer
 
 from .config import LayerConfig
-from ..tracking.model import TrackingReport
+from ..tracking.report import TrackingReport
 
 if TYPE_CHECKING:
     from .rig import Rig

@@ -4,7 +4,7 @@ from typing import List, Optional
 
 import cv2
 
-from .model import TrackingReport
+from .report import TrackingReport
 from .utils import flip, px_to_center_offset_2d
 from ..utils.cv import PINK, draw_dot_on_frame
 from ..vendor.OpenSeeFace.input_reader import InputReader

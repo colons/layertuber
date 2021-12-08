@@ -5,7 +5,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel
 
-from ..tracking.model import FloatFromTrackingReport, Vec2FromTrackingReport
+from ..tracking.report import FloatFromTrackingReport, Vec2FromTrackingReport
 
 
 logger = logging.getLogger('config')
