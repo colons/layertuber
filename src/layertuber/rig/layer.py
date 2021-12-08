@@ -8,7 +8,7 @@ from PIL.Image import Image
 from pygame.image import frombuffer
 from pygame.sprite import Group, Sprite
 from pygame.surface import Surface
-from pygame.transform import rotate
+from pygame.transform import rotozoom
 
 from pyora import Layer as PyoraLayer
 
@@ -88,7 +88,7 @@ class ConfigurableThing(ABC):
         if isinstance(self, Layer):
             angle = angle + sum((g.angle for g in self.groups() if isinstance(g, LayerGroup)))
             if angle != 0:
-                self.image = rotate(self.image, angle)
+                self.image = rotozoom(self.image, angle, 1)
 
         self.angle = angle
         self.position = position
