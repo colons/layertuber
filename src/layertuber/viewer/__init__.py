@@ -22,6 +22,7 @@ class Viewer:
 
     def __post_init__(self) -> None:
         self.screen = pygame.display.set_mode(self.rig.target_size)
+        pygame.display.set_caption('layertuber viewer')
 
     def render(self, report: TrackingReport) -> None:
         for group in self.rig.groups:
