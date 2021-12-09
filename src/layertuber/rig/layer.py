@@ -88,7 +88,9 @@ class ConfigurableThing(ABC):
         if isinstance(self, Layer):
             angle = angle + sum((g.angle for g in self.groups() if isinstance(g, LayerGroup)))
             if angle != 0:
+                original_center = self.image.get_rect(topleft=position).center
                 self.image = rotozoom(self.image, angle, 1)
+                position = self.image.get_rect(center=original_center).topleft
 
         self.angle = angle
         self.position = position
