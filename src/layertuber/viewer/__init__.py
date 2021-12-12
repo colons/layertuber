@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass, field
 from logging import getLogger
 
@@ -39,6 +40,12 @@ class Viewer:
 
     def begin_loop(self) -> None:
         while self.tracker.reader.is_open():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+                    self.tracker.calibrate()
+
             self.screen.fill(pygame.color.Color(0, 255, 0))
 
             report = self.tracker.get_report()
