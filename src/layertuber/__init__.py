@@ -1,9 +1,12 @@
 import argparse
 import logging
 import os
+from multiprocessing import Process, Queue
+from typing import Optional
 
 from .rig import Rig
-from .tracking.face import FaceTracker
+from .tracking.face import FaceTracker, TrackerControlEvent
+from .tracking.report import TrackingReport
 from .viewer import Viewer
 
 
@@ -25,10 +28,25 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = _parse_args()
-    Viewer(
-        Rig(args.rig_path, (args.width, args.height)),
-        FaceTracker(capture=args.camera),
-    ).begin_loop()
+
+    report_queue: Queue[Optional[TrackingReport]] = Queue()
+    tracker_event_queue: Queue[TrackerControlEvent] = Queue()
+
+    def run_tracker() -> None:
+        FaceTracker(tracker_event_queue, report_queue, capture=args.camera).begin_loop()
+
+    tracker_process = Process(target=run_tracker)
+    tracker_process.start()
+
+    def run_viewer() -> None:
+        Viewer(
+            Rig(args.rig_path, (args.width, args.height)),
+            report_queue,
+            tracker_event_queue,
+        ).begin_loop()
+
+    viewer_process = Process(target=run_viewer)
+    viewer_process.start()
 
 
 if __name__ == '__main__':

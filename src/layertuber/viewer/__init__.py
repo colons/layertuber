@@ -1,11 +1,15 @@
+from __future__ import annotations
+
 import sys
 from dataclasses import dataclass, field
 from logging import getLogger
+from multiprocessing import Queue
+from typing import Optional
 
 import pygame
 
 from ..rig import Rig
-from ..tracking.face import FaceTracker
+from ..tracking.face import CALIBRATE, NEXT_FRAME, TrackerControlEvent
 from ..tracking.report import TrackingReport
 
 
@@ -18,7 +22,8 @@ pygame.init()
 @dataclass
 class Viewer:
     rig: Rig
-    tracker: FaceTracker
+    reports: Queue[Optional[TrackingReport]]
+    event_queue: Queue[TrackerControlEvent]
     screen: pygame.surface.Surface = field(init=False)
 
     def __post_init__(self) -> None:
@@ -39,16 +44,19 @@ class Viewer:
         ], False)
 
     def begin_loop(self) -> None:
-        while self.tracker.reader.is_open():
+        self.event_queue.put(NEXT_FRAME)
+        while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_b:
-                    self.tracker.calibrate()
+                    self.event_queue.put(CALIBRATE)
 
             self.screen.fill(pygame.color.Color(0, 255, 0))
 
-            report = self.tracker.get_report()
+            report = self.reports.get()
+            self.event_queue.put(NEXT_FRAME)
+
             if report is not None:
                 self.render(report)
 

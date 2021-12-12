@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import logging
 import os
-from typing import List, Optional
+from multiprocessing import Queue
+from typing import List, Literal, Optional
 
 import cv2
 
@@ -18,15 +21,25 @@ logger = logging.getLogger('face tracking')
 REQUEST_INPUT_WIDTH = 800
 REQUEST_INPUT_HEIGHT = 600
 
+TrackerControlEvent = Literal['calibrate', 'next_frame']
+CALIBRATE: TrackerControlEvent = 'calibrate'
+NEXT_FRAME: TrackerControlEvent = 'next_frame'
+
 
 class FaceTracker:
+    control_queue: Queue[TrackerControlEvent]
+    report_queue: Queue[Optional[TrackingReport]]
     reader: InputReader
     tracker: Tracker
     height: int
     width: int
     neutral_report: TrackingReport
 
-    def __init__(self, capture: int = 0) -> None:
+    def __init__(
+        self, control_queue: Queue[TrackerControlEvent], report_queue: Queue[Optional[TrackingReport]], capture: int = 0
+    ) -> None:
+        self.control_queue = control_queue
+        self.report_queue = report_queue
         self.reader = InputReader(
             capture=capture, raw_rgb=False, width=REQUEST_INPUT_WIDTH, height=REQUEST_INPUT_HEIGHT, fps=30
         )
@@ -108,3 +121,11 @@ class FaceTracker:
             report['rotations'][rk] = (rv * self.neutral_report['rotations'][rk].inv())
 
         return report
+
+    def begin_loop(self) -> None:
+        while self.reader.is_open():
+            event = self.control_queue.get()
+            if event == CALIBRATE:
+                self.calibrate()
+            elif event == NEXT_FRAME:
+                self.report_queue.put(self.get_report())
