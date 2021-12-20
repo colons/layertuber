@@ -10,7 +10,7 @@ import cv2
 from scipy.spatial.transform import Rotation
 
 from .report import TrackingReport
-from .utils import flip, px_to_center_offset_2d, subtract
+from .utils import average_of_2d_vectors, flip, px_to_center_offset_2d, subtract
 from ..utils.cv import PINK, draw_dot_on_frame
 from ..vendor.OpenSeeFace.input_reader import InputReader
 from ..vendor.OpenSeeFace.tracker import FaceInfo, Tracker
@@ -94,18 +94,23 @@ class FaceTracker:
         _blink, left_gaze_y, left_gaze_x, _confidence = face.eye_state[0]
         _blink, right_gaze_y, right_gaze_x, _confidence = face.eye_state[1]
 
+        left_gaze = px_to_center_offset_2d((left_gaze_x, left_gaze_y), size)
+        right_gaze = px_to_center_offset_2d((right_gaze_x, right_gaze_y), size)
+
         return dict(
             floats=dict(
                 left_blink=eye_blink[0],
                 right_blink=eye_blink[1],
+                blink=sum(eye_blink) / len(eye_blink),
             ),
             rotations=dict(
                 head_rotation=Rotation.from_quat(face.quaternion),
             ),
             vec2s=dict(
                 face_position=px_to_center_offset_2d(flip(*face.coord), size),
-                left_gaze=px_to_center_offset_2d((left_gaze_x, left_gaze_y), size),
-                right_gaze=px_to_center_offset_2d((right_gaze_x, right_gaze_y), size),
+                left_gaze=left_gaze,
+                right_gaze=right_gaze,
+                gaze=average_of_2d_vectors(left_gaze, right_gaze)
             ),
         )
 

@@ -15,3 +15,10 @@ def px_to_center_offset(px: float, canvas: float) -> float:
 
 def px_to_center_offset_2d(px: Tuple[float, float], canvas: Tuple[float, float]) -> Tuple[float, float]:
     return px_to_center_offset(px[0], canvas[0]), px_to_center_offset(px[1], canvas[1])
+
+
+def average_of_2d_vectors(*vecs: Tuple[float, float]) -> Tuple[float, float]:
+    return (
+        sum(v[0] for v in vecs) / len(vecs),
+        sum(v[1] for v in vecs) / len(vecs),
+    )

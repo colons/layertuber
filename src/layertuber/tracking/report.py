@@ -3,9 +3,9 @@ from typing import Dict, Literal, Tuple, TypedDict
 from scipy.spatial.transform import Rotation
 
 
-FloatFromTrackingReport = Literal['left_blink', 'right_blink']
+FloatFromTrackingReport = Literal['left_blink', 'right_blink', 'blink']
 RotationFromTrackingReport = Literal['head_rotation']
-Vec2FromTrackingReport = Literal['face_position', 'left_gaze', 'right_gaze']
+Vec2FromTrackingReport = Literal['face_position', 'left_gaze', 'right_gaze', 'gaze']
 
 
 class TrackingReport(TypedDict):
