@@ -1,6 +1,6 @@
 on: [push]
 jobs:
-  mypy:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -8,4 +8,9 @@ jobs:
         with:
           python-version: '3.8'
       - run: pip install '.[dev]'
-      - run: mypy
+  mypy:
+    needs: setup
+    run: mypy
+  flake8:
+    needs: setup
+    run: flake8
