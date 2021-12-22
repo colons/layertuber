@@ -1,22 +1,14 @@
 on: [push]
 jobs:
-  setup:
+  flake8:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
-      - name: install pygobject deps
-        run: sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0
-      - run: pip install '.[dev]'
+      - uses: ./.github/actions/setup
+      - run: flake8
   mypy:
     runs-on: ubuntu-latest
-    needs: setup
     steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/setup
       - run: mypy
-  flake8:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - run: flake8
