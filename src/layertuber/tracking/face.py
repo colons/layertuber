@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from multiprocessing import Queue
+from queue import Queue
 from typing import List, Literal, Optional
 
 import cv2

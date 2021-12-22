@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass, field
 from logging import getLogger
-from multiprocessing import Queue
+from queue import Queue
 from typing import Optional
 
 import pygame

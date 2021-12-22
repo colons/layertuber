@@ -1,7 +1,8 @@
 import argparse
 import logging
 import os
-from multiprocessing import Process, Queue
+from queue import Queue
+from threading import Thread
 from typing import Optional
 
 from .rig import Rig
@@ -35,7 +36,7 @@ def main() -> None:
     def run_tracker() -> None:
         FaceTracker(tracker_event_queue, report_queue, capture=args.camera).begin_loop()
 
-    tracker_process = Process(target=run_tracker)
+    tracker_process = Thread(target=run_tracker)
     tracker_process.start()
 
     def run_viewer() -> None:
@@ -45,7 +46,7 @@ def main() -> None:
             tracker_event_queue,
         ).begin_loop()
 
-    viewer_process = Process(target=run_viewer)
+    viewer_process = Thread(target=run_viewer)
     viewer_process.start()
 
 
