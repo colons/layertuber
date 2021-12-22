@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from dataclasses import dataclass, field
 from logging import getLogger
 from queue import Queue
@@ -48,16 +47,17 @@ class Viewer:
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    sys.exit()
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_b:
-                    self.event_queue.put(CALIBRATE)
-
-            self.screen.fill(pygame.color.Color(0, 255, 0))
+                    return
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_b:
+                        self.event_queue.put(CALIBRATE)
+                    elif event.key == pygame.K_q:
+                        return
 
             report = self.reports.get()
             self.event_queue.put(NEXT_FRAME)
 
             if report is not None:
+                self.screen.fill(pygame.color.Color(0, 255, 0))
                 self.render(report)
-
-            pygame.display.flip()
+                pygame.display.flip()

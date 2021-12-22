@@ -36,7 +36,7 @@ def main() -> None:
     def run_tracker() -> None:
         FaceTracker(tracker_event_queue, report_queue, capture=args.camera).begin_loop()
 
-    tracker_process = Thread(target=run_tracker)
+    tracker_process = Thread(target=run_tracker, daemon=True)
     tracker_process.start()
 
     def run_viewer() -> None:
@@ -48,6 +48,7 @@ def main() -> None:
 
     viewer_process = Thread(target=run_viewer)
     viewer_process.start()
+    viewer_process.join()
 
 
 if __name__ == '__main__':
