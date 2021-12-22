@@ -12,7 +12,9 @@ jobs:
       - run: pip install '.[dev]'
   mypy:
     needs: setup
-    run: mypy
+    steps:
+      - run: mypy
   flake8:
     needs: setup
-    run: flake8
+    steps:
+      - run: flake8
