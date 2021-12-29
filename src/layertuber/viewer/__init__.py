@@ -33,7 +33,7 @@ class Viewer:
         for layer in self.rig.layers[::-1]:
             rendered = layer.render(report)
             if rendered is not None:
-                self.screen.blit(*rendered)
+                self.screen.blit(rendered, (0, 0))
 
     def begin_loop(self) -> None:
         self.event_queue.put(NEXT_FRAME)

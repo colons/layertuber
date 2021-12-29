@@ -60,7 +60,7 @@ class Renderable(ABC):
         else:
             return True
 
-    def render(self, report: TrackingReport) -> Optional[Tuple[Surface, Tuple[float, float]]]:
+    def render(self, report: TrackingReport) -> Optional[Surface]:
         if not self.currently_visible(report):
             return None
 
@@ -100,7 +100,7 @@ class Renderable(ABC):
 
         surface.blit(image, position)
 
-        return (surface, (0, 0))
+        return surface
 
 
 class LayerGroup(Renderable):
@@ -119,7 +119,7 @@ class LayerGroup(Renderable):
         for layer in self.layers[::-1]:
             rendered = layer.render(report)
             if rendered is not None:
-                surface.blit(*rendered)
+                surface.blit(rendered, (0, 0))
 
         return surface
 
