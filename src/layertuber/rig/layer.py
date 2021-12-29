@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import TYPE_CHECKING, Tuple, Type, TypeVar
+from typing import List, TYPE_CHECKING, Tuple, Type, TypeVar
 
 from PIL.Image import Image
 
 from pygame.image import frombuffer
-from pygame.sprite import Group, Sprite
 from pygame.surface import Surface
 from pygame.transform import rotozoom
 
@@ -19,12 +18,12 @@ if TYPE_CHECKING:
     from .rig import Rig
 
 
-C = TypeVar('C', bound='ConfigurableThing')
+R = TypeVar('R', bound='Renderable')
 
 FACING_POINT = (0, 0, 1)
 
 
-class ConfigurableThing(ABC):
+class Renderable(ABC):
     uuid: str
     name: str
     position: Tuple[float, float] = (0., 0.)
@@ -35,7 +34,7 @@ class ConfigurableThing(ABC):
     angle: float = 0  # in degrees, since that's what pygame uses
 
     @classmethod
-    def from_layer(cls: Type[C], rig: Rig, pyora_layer: PyoraLayer) -> C:
+    def from_layer(cls: Type[R], rig: Rig, pyora_layer: PyoraLayer) -> R:
         instance = cls()
 
         instance.rig = rig
@@ -100,11 +99,11 @@ class ConfigurableThing(ABC):
         self.update_position(report)
 
 
-class LayerGroup(Group, ConfigurableThing):
-    pass
+class LayerGroup(Renderable):
+    layers: List[Renderable]
 
 
-class Layer(Sprite, ConfigurableThing):
+class Layer(Renderable):
     original_image: Surface
     image: Surface
 
