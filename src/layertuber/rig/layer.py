@@ -9,7 +9,7 @@ from pygame.image import frombuffer
 from pygame.surface import Surface
 from pygame.transform import rotozoom
 
-from pyora import Layer as PyoraLayer
+from pyora import Layer as PyoraLayer, TYPE_GROUP, TYPE_LAYER
 
 from .config import LayerConfig
 from ..tracking.report import TrackingReport
@@ -60,11 +60,6 @@ class Renderable(ABC):
         position = (0., 0.)
         angle: float = 0
 
-        if isinstance(self, Layer):
-            for group in self.groups():
-                if isinstance(group, LayerGroup):
-                    position = (position[0] + group.position[0], position[1] + group.position[1])
-
         if self.config.follow is not None:
             centre_offset = report['vec2s'][self.config.follow.option]
             our_px = (
@@ -85,7 +80,6 @@ class Renderable(ABC):
             angle += report['rotations'][self.config.rotate_with.option].as_rotvec(degrees=True)[2]
 
         if isinstance(self, Layer):
-            angle = angle + sum((g.angle for g in self.groups() if isinstance(g, LayerGroup)))
             if angle != 0:
                 original_center = self.image.get_rect(topleft=position).center
                 self.image = rotozoom(self.image, angle, 1)
@@ -118,3 +112,12 @@ class Layer(Renderable):
     def update_position(self, report: TrackingReport) -> None:
         self.image = self.original_image
         super().update_position(report)
+
+
+def from_layer(rig: Rig, pyora_layer: PyoraLayer) -> Renderable:
+    if pyora_layer.type == TYPE_GROUP:
+        return LayerGroup.from_layer(rig, pyora_layer)
+    elif pyora_layer.type == TYPE_LAYER:
+        return Layer.from_layer(rig, pyora_layer)
+    else:
+        raise TypeError(f'unrecognised pyora layer type: {pyora_layer.type}')

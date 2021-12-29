@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, List, Tuple
+from typing import List, Tuple, Union
 
-from pyora import Project, TYPE_GROUP, TYPE_LAYER
+from pyora import Project
+from pyora.Layer import Group as PyoraGroup, OpenRasterItemBase
 
 import yaml
 
 from .config import RigConfig
-from .layer import Layer, LayerGroup
+from .layer import LayerGroup, Renderable, from_layer
 from .utils import target_dimensions
 
 
@@ -17,8 +18,7 @@ logger = logging.getLogger('rig')
 
 class Rig:
     project: Project
-    layers: List[Layer]
-    groups: List[LayerGroup]
+    layers: List[Renderable]
     target_size: Tuple[int, int]
     minimum_dimension: int
     config: RigConfig
@@ -29,41 +29,25 @@ class Rig:
 
         self.project = Project.load(ora_path)
         self.layers = []
-        self.groups = []
 
         configured_layer_names = {layer_name for layer_name in self.config.layers.keys()}
 
         self.target_size = target_dimensions(max_size, self.project.dimensions)
         self.minimum_dimension = min(self.target_size)
-        groups_by_uuid: Dict[str, LayerGroup] = {}
+
+        def add_layer(parent: Union[Rig, LayerGroup], pyora_layer: OpenRasterItemBase) -> None:
+            layer = from_layer(self, pyora_layer)
+            if not layer.config.visible:
+                return
+            self.layers.append(layer)
+            if isinstance(pyora_layer, PyoraGroup):
+                for child in pyora_layer.children:
+                    assert isinstance(layer, LayerGroup)
+                    add_layer(layer, child)
 
         # make groups
-        for pyora_layer in self.project.children_recursive:
-            if pyora_layer.type == TYPE_GROUP:
-                group = LayerGroup.from_layer(self, pyora_layer)
-                if not group.config.visible:
-                    continue
-                self.groups.append(group)
-                groups_by_uuid[group.uuid] = group
-
-        # make layers
-        for pyora_layer in self.project.children_recursive:
-            if pyora_layer.name in configured_layer_names:
-                configured_layer_names.remove(pyora_layer.name)
-            else:
-                logger.info(f'layer {pyora_layer.name!r} has no configuration')
-
-            if pyora_layer.type == TYPE_LAYER:
-                layer = Layer.from_layer(self, pyora_layer)
-                if not layer.config.visible:
-                    continue
-                self.layers.append(layer)
-                parent = pyora_layer.parent
-                while parent is not None:
-                    layer_group = groups_by_uuid.get(parent.uuid)
-                    if layer_group is not None:
-                        layer.add(layer_group)
-                    parent = parent.parent
+        for pyora_layer in self.project.children:
+            add_layer(self, pyora_layer)
 
         if configured_layer_names:
             logger.warning(
