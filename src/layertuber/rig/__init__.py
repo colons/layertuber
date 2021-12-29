@@ -1,1 +1,1 @@
-from .rig import Rig  # noqa
+from .rig import InvalidRig, Rig  # noqa

@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import List, Tuple, Union
 
+from pydantic import ValidationError
+
 from pyora import Project
 from pyora.Layer import Group as PyoraGroup, OpenRasterItemBase
 
@@ -16,6 +18,10 @@ from .utils import target_dimensions
 logger = logging.getLogger('rig')
 
 
+class InvalidRig(BaseException):
+    pass
+
+
 class Rig:
     project: Project
     layers: List[Renderable]
@@ -24,10 +30,17 @@ class Rig:
     config: RigConfig
 
     def __init__(self, ora_path: str, max_size: Tuple[int, int]):
-        with open(f'{ora_path}.layertuber.yaml') as rig_config_file:
-            self.config = RigConfig.parse_obj(yaml.load(rig_config_file, yaml.Loader))
+        try:
+            self.project = Project.load(ora_path)
+        except FileNotFoundError as e:
+            raise InvalidRig(e)
 
-        self.project = Project.load(ora_path)
+        try:
+            with open(f'{ora_path}.layertuber.yaml') as rig_config_file:
+                self.config = RigConfig.parse_obj(yaml.load(rig_config_file, yaml.Loader))
+        except (FileNotFoundError, ValidationError) as e:
+            raise InvalidRig(e)
+
         self.layers = []
 
         configured_layer_names = {layer_name for layer_name in self.config.layers.keys()}

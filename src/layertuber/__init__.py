@@ -1,15 +1,13 @@
 import argparse
 import logging
-import os; os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'true'  # noqa
+import os
+import sys
 from queue import Queue
 from threading import Thread
 from typing import Optional
 
-from .rig import Rig
-from .tracking.face import FaceTracker, TrackerControlEvent
-from .tracking.report import TrackingReport
-from .viewer import Viewer
 
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'true'
 
 logging.basicConfig(
     level=os.environ.get('LOGLEVEL', 'INFO').upper(),
@@ -30,7 +28,18 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    from .rig import InvalidRig, Rig
+    from .tracking.face import FaceTracker, TrackerControlEvent
+    from .tracking.report import TrackingReport
+    from .viewer import Viewer
+
     args = _parse_args()
+
+    try:
+        rig = Rig(args.rig_path, (args.output_width, args.output_height))
+    except InvalidRig as e:
+        print(e)
+        sys.exit(1)
 
     report_queue: Queue[Optional[TrackingReport]] = Queue()
     tracker_event_queue: Queue[TrackerControlEvent] = Queue()
@@ -42,11 +51,7 @@ def main() -> None:
     tracker_process.start()
 
     def run_viewer() -> None:
-        Viewer(
-            Rig(args.rig_path, (args.width, args.height)),
-            report_queue,
-            tracker_event_queue,
-        ).begin_loop()
+        Viewer(rig, report_queue, tracker_event_queue).begin_loop()
 
     viewer_process = Thread(target=run_viewer)
     viewer_process.start()
