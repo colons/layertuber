@@ -39,7 +39,7 @@ class Rig:
             layer = from_layer(self, pyora_layer)
             if not layer.config.visible:
                 return
-            self.layers.append(layer)
+            parent.layers.append(layer)
             if isinstance(pyora_layer, PyoraGroup):
                 for child in pyora_layer.children:
                     assert isinstance(layer, LayerGroup)

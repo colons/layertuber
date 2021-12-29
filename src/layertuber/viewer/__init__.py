@@ -30,17 +30,10 @@ class Viewer:
         pygame.display.set_caption('layertuber viewer')
 
     def render(self, report: TrackingReport) -> None:
-        for group in self.rig.groups:
-            group.update_from_report(report)
-
-        for layer in self.rig.layers:
-            layer.update_from_report(report)
-
-        self.screen.blits([
-            (layer.image, layer.position)
-            for layer in self.rig.layers[::-1]
-            if layer.visible
-        ], False)
+        for layer in self.rig.layers[::-1]:
+            rendered = layer.render(report)
+            if rendered is not None:
+                self.screen.blit(*rendered)
 
     def begin_loop(self) -> None:
         self.event_queue.put(NEXT_FRAME)

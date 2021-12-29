@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from abc import ABC
-from typing import List, TYPE_CHECKING, Tuple, Type, TypeVar
+from abc import ABC, abstractmethod
+from typing import List, Optional, TYPE_CHECKING, Tuple, Type, TypeVar
 
 from PIL.Image import Image
 
+from pygame import SRCALPHA
 from pygame.image import frombuffer
 from pygame.surface import Surface
 from pygame.transform import rotozoom
@@ -45,18 +46,29 @@ class Renderable(ABC):
 
         return instance
 
-    def update_visibility(self, report: TrackingReport) -> None:
+    @abstractmethod
+    def untransformed_image(self, report: TrackingReport) -> Optional[Surface]:
+        raise NotImplementedError()
+
+    def currently_visible(self, report: TrackingReport) -> bool:
         if self.config.visible_when is not None:
-            self.visible = (
-                report['floats'][self.config.visible_when.option] > self.config.visible_when.greater_than
-            )
+            return report['floats'][self.config.visible_when.option] > self.config.visible_when.greater_than
 
         if self.config.invisible_when is not None:
-            self.visible = not (
-                report['floats'][self.config.invisible_when.option] > self.config.invisible_when.greater_than
-            )
+            return report['floats'][self.config.invisible_when.option] <= self.config.invisible_when.greater_than
 
-    def update_position(self, report: TrackingReport) -> None:
+        else:
+            return True
+
+    def render(self, report: TrackingReport) -> Optional[Tuple[Surface, Tuple[float, float]]]:
+        if not self.currently_visible(report):
+            return None
+
+        image = self.untransformed_image(report)
+
+        if image is None:
+            return None
+
         position = (0., 0.)
         angle: float = 0
 
@@ -79,27 +91,41 @@ class Renderable(ABC):
         if self.config.rotate_with is not None:
             angle += report['rotations'][self.config.rotate_with.option].as_rotvec(degrees=True)[2]
 
-        if isinstance(self, Layer):
-            if angle != 0:
-                original_center = self.image.get_rect(topleft=position).center
-                self.image = rotozoom(self.image, angle, 1)
-                position = self.image.get_rect(center=original_center).topleft
+        surface = Surface(self.rig.target_size, SRCALPHA)
 
-        self.angle = angle
-        self.position = position
+        if angle != 0:
+            original_center = image.get_rect(topleft=position).center
+            image = rotozoom(image, angle, 1)
+            position = image.get_rect(center=original_center).topleft
 
-    def update_from_report(self, report: TrackingReport) -> None:
-        self.update_visibility(report)
-        self.update_position(report)
+        surface.blit(image, position)
+
+        return (surface, (0, 0))
 
 
 class LayerGroup(Renderable):
     layers: List[Renderable]
 
+    def __init__(self) -> None:
+        super().__init__()
+        self.layers = []
+
+    def untransformed_image(self, report: TrackingReport) -> Optional[Surface]:
+        if not self.currently_visible(report):
+            return None
+
+        surface = Surface(self.rig.target_size, SRCALPHA)
+
+        for layer in self.layers[::-1]:
+            rendered = layer.render(report)
+            if rendered is not None:
+                surface.blit(*rendered)
+
+        return surface
+
 
 class Layer(Renderable):
     original_image: Surface
-    image: Surface
 
     @classmethod
     def from_layer(cls, rig: Rig, pyora_layer: PyoraLayer) -> Layer:
@@ -109,9 +135,8 @@ class Layer(Renderable):
         instance.original_image = frombuffer(pil_image.tobytes(), rig.target_size, 'RGBA')
         return instance
 
-    def update_position(self, report: TrackingReport) -> None:
-        self.image = self.original_image
-        super().update_position(report)
+    def untransformed_image(self, report: TrackingReport) -> Surface:
+        return self.original_image
 
 
 def from_layer(rig: Rig, pyora_layer: PyoraLayer) -> Renderable:
