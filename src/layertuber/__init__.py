@@ -29,7 +29,10 @@ def _parse_args() -> argparse.Namespace:
     ))
     parser.add_argument('-x', '--output-width', type=int, default=800)
     parser.add_argument('-y', '--output-height', type=int, default=600)
-    parser.add_argument('rig_path')
+    parser.add_argument('rig_path', help=(
+        'The path to the .ora file containing the art that makes up your vtuber. In the same directory as the .ora '
+        'file, there must also be a similarly-named .ora.layertuber.yaml file describing how the layers are rigged.'
+    ))
     return parser.parse_args()
 
 
