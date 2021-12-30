@@ -14,6 +14,7 @@ from pyora import Layer as PyoraLayer, TYPE_GROUP, TYPE_LAYER
 
 from .config import LayerConfig
 from ..tracking.report import TrackingReport
+from ..tracking.utils import add
 
 if TYPE_CHECKING:
     from .rig import Rig
@@ -60,6 +61,27 @@ class Renderable(ABC):
         else:
             return True
 
+    def get_follow_offset(self, report: TrackingReport) -> Tuple[float, float]:
+        if self.config.follow is not None:
+            centre_offset = report['vec2s'][self.config.follow.option]
+            return (
+                centre_offset[0] * self.config.follow.scale * self.rig.minimum_dimension,
+                centre_offset[1] * self.config.follow.scale * self.rig.minimum_dimension,
+            )
+        else:
+            return (0, 0)
+
+    def get_facing_point_offset(self, report: TrackingReport) -> Tuple[float, float]:
+        if self.config.follow_facing_point is not None:
+            rot = report['rotations'][self.config.follow_facing_point.option]
+            x, y, z = rot.apply(FACING_POINT)
+            return (
+                (x * self.config.follow_facing_point.scale * self.rig.minimum_dimension),
+                (y * self.config.follow_facing_point.scale * self.rig.minimum_dimension),
+            )
+        else:
+            return (0, 0)
+
     def render(self, report: TrackingReport) -> Optional[Surface]:
         if not self.currently_visible(report):
             return None
@@ -69,24 +91,8 @@ class Renderable(ABC):
         if image is None:
             return None
 
-        position = (0., 0.)
         angle: float = 0
-
-        if self.config.follow is not None:
-            centre_offset = report['vec2s'][self.config.follow.option]
-            our_px = (
-                centre_offset[0] * self.config.follow.scale * self.rig.minimum_dimension,
-                centre_offset[1] * self.config.follow.scale * self.rig.minimum_dimension,
-            )
-            position = (position[0] + our_px[0], position[1] + our_px[1])
-
-        if self.config.follow_facing_point is not None:
-            rot = report['rotations'][self.config.follow_facing_point.option]
-            x, y, z = rot.apply(FACING_POINT)
-            position = (
-                position[0] + (x * self.config.follow_facing_point.scale * self.rig.minimum_dimension),
-                position[1] + (y * self.config.follow_facing_point.scale * self.rig.minimum_dimension),
-            )
+        position = add(self.get_follow_offset(report), self.get_facing_point_offset(report))
 
         if self.config.rotate_with is not None:
             angle += report['rotations'][self.config.rotate_with.option].as_rotvec(degrees=True)[2]

@@ -12,6 +12,24 @@ def flip(y: float, x: float) -> Tuple[float, float]:
     return x, y
 
 
+def add(*vecs: Tuple[float, float]) -> Tuple[float, float]:
+    """
+    >>> add()
+    (0, 0)
+    >>> add((1, 1))
+    (1, 1)
+    >>> add((1, 1), (2, 3))
+    (3, 4)
+    >>> add((1, 1), (2, 3), (-1, -10))
+    (2, -6)
+    """
+
+    return (
+        sum(v[0] for v in vecs),
+        sum(v[1] for v in vecs),
+    )
+
+
 def subtract(a: Tuple[float, float], b: Tuple[float, float]) -> Tuple[float, float]:
     """
     >>> subtract((3, 12), (1, 5))
