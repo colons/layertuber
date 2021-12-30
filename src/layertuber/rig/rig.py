@@ -43,8 +43,6 @@ class Rig:
 
         self.layers = []
 
-        configured_layer_names = {layer_name for layer_name in self.config.layers.keys()}
-
         self.target_size = target_dimensions(max_size, self.project.dimensions)
         self.minimum_dimension = min(self.target_size)
 
@@ -62,8 +60,11 @@ class Rig:
         for pyora_layer in self.project.children:
             add_layer(self, pyora_layer)
 
-        if configured_layer_names:
+        missing_configured_layers = {configured_layer for configured_layer in self.config.layers.keys()} - {
+            pyora_layer.name for pyora_layer in self.project.children_recursive
+        }
+        if missing_configured_layers:
             logger.warning(
-                f'layers {", ".join((repr(n) for n in configured_layer_names))} '
+                f'layers {", ".join((repr(n) for n in missing_configured_layers))} '
                 'configured but do not exist in this image'
             )
