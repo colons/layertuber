@@ -12,3 +12,9 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/setup
       - run: mypy
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/setup
+      - run: pytest
