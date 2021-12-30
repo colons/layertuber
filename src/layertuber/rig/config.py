@@ -21,6 +21,11 @@ class Vec2ScaledConfig(BaseModel):
     scale: float = 1
 
 
+class LinearFollowConfig(BaseModel):
+    option: FloatFromTrackingReport
+    scale: float = 1
+
+
 class ScalarQuatConfig(BaseModel):
     option: RotationFromTrackingReport
     scale: float = 1
@@ -31,6 +36,8 @@ class LayerConfig(BaseModel):
     visible_when: Optional[ThresholdConfig]
     invisible_when: Optional[ThresholdConfig]
     follow: Optional[Vec2ScaledConfig]
+    follow_x: Optional[LinearFollowConfig]
+    follow_y: Optional[LinearFollowConfig]
     follow_facing_point: Optional[ScalarQuatConfig]
     rotate_with: Optional[ScalarQuatConfig]
 

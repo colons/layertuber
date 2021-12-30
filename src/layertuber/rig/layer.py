@@ -71,6 +71,14 @@ class Renderable(ABC):
         else:
             return (0, 0)
 
+    def get_follow_xy_offset(self, report: TrackingReport) -> Tuple[float, float]:
+        return (
+            report['floats'][self.config.follow_x.option] * self.config.follow_x.scale * self.rig.minimum_dimension
+            if self.config.follow_x is not None else 0,
+            report['floats'][self.config.follow_y.option] * self.config.follow_y.scale * self.rig.minimum_dimension
+            if self.config.follow_y is not None else 0,
+        )
+
     def get_facing_point_offset(self, report: TrackingReport) -> Tuple[float, float]:
         if self.config.follow_facing_point is not None:
             rot = report['rotations'][self.config.follow_facing_point.option]
@@ -92,7 +100,11 @@ class Renderable(ABC):
             return None
 
         angle: float = 0
-        position = add(self.get_follow_offset(report), self.get_facing_point_offset(report))
+        position = add(
+            self.get_follow_offset(report),
+            self.get_facing_point_offset(report),
+            self.get_follow_xy_offset(report),
+        )
 
         if self.config.rotate_with is not None:
             angle += report['rotations'][self.config.rotate_with.option].as_rotvec(degrees=True)[2]
