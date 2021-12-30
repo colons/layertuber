@@ -3,16 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from logging import getLogger
 from queue import Queue
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 
 import pygame
 
 from ..rig import Rig
 from ..tracking.face import CALIBRATE, NEXT_FRAME, TrackerControlEvent
 from ..tracking.report import TrackingReport
-
-if TYPE_CHECKING:
-    from pygame.color import _ColorValue
 
 
 logger = getLogger('viewer')
@@ -26,7 +23,7 @@ class Viewer:
     rig: Rig
     reports: Queue[Optional[TrackingReport]]
     event_queue: Queue[TrackerControlEvent]
-    background: _ColorValue = '#00ff00'
+    background: str = '#00ff00'
 
     screen: pygame.surface.Surface = field(init=False)
 
