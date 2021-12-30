@@ -24,6 +24,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument('--show-features', action='store_true', help=(
         'Show an additional window with your webcam feed and facial feature detection spots overlaid on it.'
     ))
+    parser.add_argument('-b', '--background', type=str, default='#00ff00', help=(
+        'The background of the viewer, in hex (by default, #00ff00; solid green).'
+    ))
     parser.add_argument('-x', '--output-width', type=int, default=800)
     parser.add_argument('-y', '--output-height', type=int, default=600)
     parser.add_argument('rig_path')
@@ -56,7 +59,7 @@ def main() -> None:
     tracker_process.start()
 
     def run_viewer() -> None:
-        Viewer(rig, report_queue, tracker_event_queue).begin_loop()
+        Viewer(rig, report_queue, tracker_event_queue, background=args.background).begin_loop()
 
     viewer_process = Thread(target=run_viewer)
     viewer_process.start()
