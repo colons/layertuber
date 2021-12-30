@@ -4,6 +4,9 @@ runs:
     - uses: actions/setup-python@v2
       with:
         python-version: '3.8'
+    - name: checkout submodules
+      run: git submodule update --init --recursive
+      shell: bash
     - name: install pygobject deps
       run: sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0
       shell: bash
