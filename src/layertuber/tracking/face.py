@@ -97,11 +97,28 @@ class FaceTracker:
         left_gaze = px_to_center_offset_2d((left_gaze_x, left_gaze_y), size)
         right_gaze = px_to_center_offset_2d((right_gaze_x, right_gaze_y), size)
 
+        features = face.current_features
+
         return dict(
             floats=dict(
-                left_blink=eye_blink[0],
-                right_blink=eye_blink[1],
+                blink_left=eye_blink[0],
+                blink_right=eye_blink[1],
                 blink=sum(eye_blink) / len(eye_blink),
+
+                eyebrow_quirk_left=features['eyebrow_quirk_l'],
+                eyebrow_quirk_right=features['eyebrow_quirk_r'],
+                eyebrow_quirk=(features['eyebrow_quirk_l'] + features['eyebrow_quirk_r']) / 2,
+
+                eyebrow_steepness_left=features['eyebrow_steepness_l'],
+                eyebrow_steepness_right=features['eyebrow_steepness_r'],
+                eyebrow_steepness=(features['eyebrow_steepness_l'] + features['eyebrow_steepness_r']) / 2,
+
+                eyebrow_updown_left=features['eyebrow_updown_l'],
+                eyebrow_updown_right=features['eyebrow_updown_r'],
+                eyebrow_updown=(features['eyebrow_updown_l'] + features['eyebrow_updown_r']) / 2,
+
+                mouth_open=features['mouth_open'],
+                mouth_wide=features['mouth_wide'],
             ),
             rotations=dict(
                 head_rotation=Rotation.from_quat(face.quaternion),
