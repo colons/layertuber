@@ -21,6 +21,9 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument('-c', '--camera', type=int, default=0, help=(
         'The index of the camera to use. If your computer has only one webcam, you can leave this at its default 0.'
     ))
+    parser.add_argument('--show-features', action='store_true', help=(
+        'Show an additional window with your webcam feed and facial feature detection spots overlaid on it.'
+    ))
     parser.add_argument('-x', '--output-width', type=int, default=800)
     parser.add_argument('-y', '--output-height', type=int, default=600)
     parser.add_argument('rig_path')
@@ -45,7 +48,9 @@ def main() -> None:
     tracker_event_queue: Queue[TrackerControlEvent] = Queue()
 
     def run_tracker() -> None:
-        FaceTracker(tracker_event_queue, report_queue, capture=args.camera).begin_loop()
+        FaceTracker(
+            tracker_event_queue, report_queue, capture=args.camera, show_features=args.show_features
+        ).begin_loop()
 
     tracker_process = Thread(target=run_tracker, daemon=True)
     tracker_process.start()

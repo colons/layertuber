@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import os
 from queue import Queue
 from typing import List, Literal, Optional
 
@@ -33,16 +32,22 @@ class FaceTracker:
     tracker: Tracker
     height: int
     width: int
+    show_features: bool
     neutral_report: TrackingReport
 
     def __init__(
-        self, control_queue: Queue[TrackerControlEvent], report_queue: Queue[Optional[TrackingReport]], capture: int = 0
+        self,
+        control_queue: Queue[TrackerControlEvent],
+        report_queue: Queue[Optional[TrackingReport]],
+        capture: int = 0,
+        show_features: bool = False,
     ) -> None:
         self.control_queue = control_queue
         self.report_queue = report_queue
         self.reader = InputReader(
             capture=capture, raw_rgb=False, width=REQUEST_INPUT_WIDTH, height=REQUEST_INPUT_HEIGHT, fps=30
         )
+        self.show_features = show_features
 
         ret, frame = self.reader.read()
         if not ret:
@@ -73,7 +78,7 @@ class FaceTracker:
 
         face, = faces  # we only allow one
 
-        if os.environ.get('SHOW_FEATURES'):
+        if self.show_features:
             # `lms` here means `landmarks`
             for _part_number, (feature_x, feature_y, _c) in enumerate(face.lms):
                 draw_dot_on_frame(input_frame, PINK, 2, feature_x, feature_y)
