@@ -11,5 +11,6 @@ Doing code checks:
 
 .. code-block:: bash
 
+   pytest
    flake8
    mypy
