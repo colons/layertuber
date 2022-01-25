@@ -150,7 +150,7 @@ class Layer(Renderable):
         instance = super().from_layer(rig, pyora_layer)
         pil_image: Image = pyora_layer.get_image_data(raw=False)
         pil_image = pil_image.resize(rig.target_size)
-        instance.original_image = frombuffer(pil_image.tobytes(), rig.target_size, 'RGBA')
+        instance.original_image = frombuffer(pil_image.tobytes(), rig.target_size, 'RGBA').convert_alpha()
         return instance
 
     def untransformed_image(self, report: TrackingReport) -> Surface:

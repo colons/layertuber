@@ -37,12 +37,16 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    import pygame
+
     from .rig import InvalidRig, Rig
     from .tracking.face import FaceTracker, TrackerControlEvent
     from .tracking.report import TrackingReport
     from .viewer import Viewer
 
     args = _parse_args()
+
+    screen = pygame.display.set_mode((args.output_width, args.output_height))
 
     try:
         rig = Rig(args.rig_path, (args.output_width, args.output_height))
@@ -62,7 +66,7 @@ def main() -> None:
     tracker_process.start()
 
     def run_viewer() -> None:
-        Viewer(rig, report_queue, tracker_event_queue, background=args.background).begin_loop()
+        Viewer(rig, report_queue, tracker_event_queue, background=args.background, screen=screen).begin_loop()
 
     viewer_process = Thread(target=run_viewer)
     viewer_process.start()

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from logging import getLogger
 from queue import Queue
 from typing import Optional
@@ -23,12 +23,10 @@ class Viewer:
     rig: Rig
     reports: Queue[Optional[TrackingReport]]
     event_queue: Queue[TrackerControlEvent]
+    screen: pygame.surface.Surface
     background: str = '#00ff00'
 
-    screen: pygame.surface.Surface = field(init=False)
-
     def __post_init__(self) -> None:
-        self.screen = pygame.display.set_mode(self.rig.target_size)
         pygame.display.set_caption('layertuber viewer')
 
     def render(self, report: TrackingReport) -> None:
