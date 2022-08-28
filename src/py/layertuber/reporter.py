@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from queue import Queue
 from typing import Optional
+
+import orjson
 
 from scipy.spatial.transform import Rotation
 
@@ -11,12 +12,11 @@ from .tracking.face import NEXT_FRAME, TrackerControlEvent
 from .tracking.report import TrackingReport
 
 
-class ReportEncoder(json.JSONEncoder):
-    def default(self, o: object) -> object:
-        if isinstance(o, Rotation):
-            return list(o.as_quat())
+def default(o: object) -> object:
+    if isinstance(o, Rotation):
+        return o.as_quat()
 
-        return super().default(o)
+    raise TypeError()
 
 
 @dataclass
@@ -34,4 +34,4 @@ class Reporter:
             self.event_queue.put(NEXT_FRAME)
 
             if report is not None:
-                print(json.dumps(report, cls=ReportEncoder))
+                print(orjson.dumps(report, default=default, option=orjson.OPT_SERIALIZE_NUMPY))
