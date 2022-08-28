@@ -27,9 +27,9 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    from .tracking.face import FaceTracker, TrackerControlEvent
-    from .tracking.report import TrackingReport
-    from .reporter import Reporter
+    from layertuber.tracking.face import FaceTracker, TrackerControlEvent
+    from layertuber.tracking.report import TrackingReport
+    from layertuber.reporter import Reporter
 
     args = _parse_args()
 
