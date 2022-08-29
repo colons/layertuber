@@ -8,7 +8,7 @@ use std::thread;
 use std::time::Duration;
 use subprocess::{ExitStatus, Popen, PopenConfig, PopenError};
 
-const TRACKER_BIN: &'static [u8] = include_bytes!("py/dist/layertuber");
+mod bin;
 
 #[derive(Debug)]
 pub enum RunTrackerError {
@@ -37,7 +37,7 @@ pub fn run_tracker() -> Result<(), RunTrackerError> {
 
     let mut tracker_bin = File::create(&tracker_bin_path)?;
 
-    tracker_bin.write(TRACKER_BIN)?;
+    tracker_bin.write(bin::TRACKER_BIN)?;
     tracker_bin.flush()?;
 
     let metadata = tracker_bin.metadata()?;
