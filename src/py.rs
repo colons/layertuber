@@ -10,7 +10,8 @@ use subprocess::{ExitStatus, Popen, PopenConfig, PopenError};
 
 const TRACKER_BIN: &'static [u8] = include_bytes!("py/dist/layertuber");
 
-enum RunTrackerError {
+#[derive(Debug)]
+pub enum RunTrackerError {
     Io(std::io::Error),
     Popen(PopenError),
 }
