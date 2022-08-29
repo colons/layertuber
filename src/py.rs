@@ -24,7 +24,7 @@ pub fn run_tracker() {
 
     let metadata = tracker_bin.metadata().expect("could not read metadata");
     let mut permissions = metadata.permissions();
-    permissions.set_mode(0o500);
+    permissions.set_mode(0o700);
     fs::set_permissions(&tracker_bin_path, permissions).expect("could not make tracker executable");
 
     drop(tracker_bin);
