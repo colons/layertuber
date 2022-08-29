@@ -7,5 +7,5 @@ edition = "2021"
 subprocess = "0.2.9"
 
 [dependencies]
+dirs = "4.0.0"
 subprocess = "0.2.9"
-tempfile = "3.3.0"
