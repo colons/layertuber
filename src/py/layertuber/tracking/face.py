@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import logging
 from queue import Queue
 from typing import List, Literal, Optional
