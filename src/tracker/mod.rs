@@ -48,22 +48,42 @@ impl RunningTracker {
         }
     }
 
+    fn poll(&mut self) {
+        match self.p.poll() {
+            Some(e) => {
+                (*self.cleanup)();
+                match e {
+                    ExitStatus::Exited(s) => panic!("tracker died with exit code {}", s),
+                    ExitStatus::Signaled(s) => panic!("tracker died with signal {}", s),
+                    ExitStatus::Other(s) => panic!("tracker died for some reason: {}", s),
+                    ExitStatus::Undetermined => panic!("tracker died for some reason"),
+                }
+            }
+            None => (),
+        };
+    }
+
+    fn communicate(&mut self) {
+        println!("attempting comms");
+        match self.p.communicate(None) {
+            Ok((out, _err)) => {
+                match out {
+                    Some(out) => println!("from tracker: {}", out),
+                    None => (),
+                }
+            },
+            Err(e) => {
+                (*self.cleanup)();
+                panic!("couldn't get tracking report: {}", e)
+            }
+        }
+        thread::sleep(Duration::from_secs(1));
+    }
+
     pub fn begin(&mut self) {
         loop {
-            match self.p.poll() {
-                Some(e) => {
-                    (*self.cleanup)();
-                    match e {
-                        ExitStatus::Exited(s) => panic!("tracker died with exit code {}", s),
-                        ExitStatus::Signaled(s) => panic!("tracker died with signal {}", s),
-                        ExitStatus::Other(s) => panic!("tracker died for some reason: {}", s),
-                        ExitStatus::Undetermined => panic!("tracker died for some reason"),
-                    }
-                }
-                None => (),
-            };
-            thread::sleep(Duration::from_secs(1));
-            println!("from py host");
+            self.poll();
+            self.communicate();
         }
     }
 }
