@@ -1,6 +1,6 @@
 import logging
 from queue import Queue
-from typing import List, Literal, Optional
+from typing import Literal, Optional
 
 import cv2
 
@@ -69,7 +69,7 @@ class FaceTracker:
         if not ret:
             raise RuntimeError('video capture stopped')
 
-        faces: List[FaceInfo] = self.tracker.predict(input_frame)
+        faces: list[FaceInfo] = self.tracker.predict(input_frame)
 
         if not faces:
             return None

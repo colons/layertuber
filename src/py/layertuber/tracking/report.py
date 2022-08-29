@@ -1,4 +1,4 @@
-from typing import Dict, Literal, Tuple, TypedDict
+from typing import Literal, TypedDict
 
 from scipy.spatial.transform import Rotation
 
@@ -15,6 +15,6 @@ Vec2FromTrackingReport = Literal['face_position', 'left_gaze', 'right_gaze', 'ga
 
 
 class TrackingReport(TypedDict):
-    floats: Dict[FloatFromTrackingReport, float]
-    rotations: Dict[RotationFromTrackingReport, Rotation]
-    vec2s: Dict[Vec2FromTrackingReport, Tuple[float, float]]
+    floats: dict[FloatFromTrackingReport, float]
+    rotations: dict[RotationFromTrackingReport, Rotation]
+    vec2s: dict[Vec2FromTrackingReport, tuple[float, float]]

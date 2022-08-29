@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional, TYPE_CHECKING, Tuple, Type, TypeVar
+from typing import Optional, TYPE_CHECKING, TypeVar
 
 from PIL.Image import Image
 
@@ -26,7 +26,7 @@ FACING_POINT = (0, 0, 1)
 class Renderable(ABC):
     uuid: str
     name: str
-    position: Tuple[float, float] = (0., 0.)
+    position: tuple[float, float] = (0., 0.)
     forced_invisible: bool = False
     visible: bool = True
     config: LayerConfig
@@ -34,7 +34,7 @@ class Renderable(ABC):
     angle: float = 0  # in degrees, since that's what pygame uses
 
     @classmethod
-    def from_layer(cls: Type[R], rig: Rig, pyora_layer: PyoraLayer) -> R:
+    def from_layer(cls: type[R], rig: Rig, pyora_layer: PyoraLayer) -> R:
         instance = cls()
 
         instance.rig = rig
@@ -59,7 +59,7 @@ class Renderable(ABC):
         else:
             return True
 
-    def get_follow_offset(self, report: TrackingReport) -> Tuple[float, float]:
+    def get_follow_offset(self, report: TrackingReport) -> tuple[float, float]:
         if self.config.follow is not None:
             centre_offset = report['vec2s'][self.config.follow.option]
             return (
@@ -69,7 +69,7 @@ class Renderable(ABC):
         else:
             return (0, 0)
 
-    def get_follow_xy_offset(self, report: TrackingReport) -> Tuple[float, float]:
+    def get_follow_xy_offset(self, report: TrackingReport) -> tuple[float, float]:
         return (
             report['floats'][self.config.follow_x.option] * self.config.follow_x.scale * self.rig.minimum_dimension
             if self.config.follow_x is not None else 0,
@@ -77,7 +77,7 @@ class Renderable(ABC):
             if self.config.follow_y is not None else 0,
         )
 
-    def get_facing_point_offset(self, report: TrackingReport) -> Tuple[float, float]:
+    def get_facing_point_offset(self, report: TrackingReport) -> tuple[float, float]:
         if self.config.follow_facing_point is not None:
             rot = report['rotations'][self.config.follow_facing_point.option]
             x, y, z = rot.apply(FACING_POINT)
@@ -120,7 +120,7 @@ class Renderable(ABC):
 
 
 class LayerGroup(Renderable):
-    layers: List[Renderable]
+    layers: list[Renderable]
 
     def __init__(self) -> None:
         super().__init__()

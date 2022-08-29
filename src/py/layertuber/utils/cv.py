@@ -1,5 +1,3 @@
-from typing import Tuple
-
 import numpy
 
 
@@ -7,7 +5,7 @@ PINK = (0x66, 0x66, 0xdd)
 GREEN = (0x66, 0xdd, 0x66)
 
 
-def draw_dot_on_frame(frame: numpy.ndarray, colour: Tuple[int, int, int], size: int, x: int, y: int) -> None:
+def draw_dot_on_frame(frame: numpy.ndarray, colour: tuple[int, int, int], size: int, x: int, y: int) -> None:
     width, height, _depth = frame.shape
     padding = tuple(range(0 - size, 1 + size))
 

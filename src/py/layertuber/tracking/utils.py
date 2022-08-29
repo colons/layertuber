@@ -1,7 +1,4 @@
-from typing import Tuple
-
-
-def flip(y: float, x: float) -> Tuple[float, float]:
+def flip(y: float, x: float) -> tuple[float, float]:
     """
     >>> flip(1, 2)
     (2, 1)
@@ -12,7 +9,7 @@ def flip(y: float, x: float) -> Tuple[float, float]:
     return x, y
 
 
-def add(*vecs: Tuple[float, float]) -> Tuple[float, float]:
+def add(*vecs: tuple[float, float]) -> tuple[float, float]:
     """
     >>> add()
     (0, 0)
@@ -30,7 +27,7 @@ def add(*vecs: Tuple[float, float]) -> Tuple[float, float]:
     )
 
 
-def subtract(a: Tuple[float, float], b: Tuple[float, float]) -> Tuple[float, float]:
+def subtract(a: tuple[float, float], b: tuple[float, float]) -> tuple[float, float]:
     """
     >>> subtract((3, 12), (1, 5))
     (2, 7)
@@ -43,7 +40,7 @@ def px_to_center_offset(px: float, canvas: float) -> float:
     return (px / canvas) - 0.5
 
 
-def px_to_center_offset_2d(px: Tuple[float, float], canvas: Tuple[float, float]) -> Tuple[float, float]:
+def px_to_center_offset_2d(px: tuple[float, float], canvas: tuple[float, float]) -> tuple[float, float]:
     """
     >>> px_to_center_offset_2d((400, 300), (800, 600))
     (0.0, 0.0)
@@ -58,7 +55,7 @@ def px_to_center_offset_2d(px: Tuple[float, float], canvas: Tuple[float, float])
     return px_to_center_offset(px[0], canvas[0]), px_to_center_offset(px[1], canvas[1])
 
 
-def average_of_2d_vectors(*vecs: Tuple[float, float]) -> Tuple[float, float]:
+def average_of_2d_vectors(*vecs: tuple[float, float]) -> tuple[float, float]:
     """
     >>> average_of_2d_vectors((0.1, 0.2))
     (0.1, 0.2)

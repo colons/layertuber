@@ -1,5 +1,4 @@
 import logging
-from typing import List, Tuple, Union
 
 from pydantic import ValidationError
 
@@ -22,12 +21,12 @@ class InvalidRig(BaseException):
 
 class Rig:
     project: Project
-    layers: List[Renderable]
-    target_size: Tuple[int, int]
+    layers: list[Renderable]
+    target_size: tuple[int, int]
     minimum_dimension: int
     config: RigConfig
 
-    def __init__(self, ora_path: str, max_size: Tuple[int, int]):
+    def __init__(self, ora_path: str, max_size: tuple[int, int]):
         try:
             self.project = Project.load(ora_path)
         except FileNotFoundError as e:
@@ -44,7 +43,7 @@ class Rig:
         self.target_size = target_dimensions(max_size, self.project.dimensions)
         self.minimum_dimension = min(self.target_size)
 
-        def add_layer(parent: Union[Rig, LayerGroup], pyora_layer: OpenRasterItemBase) -> None:
+        def add_layer(parent: Rig | LayerGroup, pyora_layer: OpenRasterItemBase) -> None:
             layer = from_layer(self, pyora_layer)
             if not layer.config.visible:
                 return

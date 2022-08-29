@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -41,4 +41,4 @@ class LayerConfig(BaseModel):
 
 
 class RigConfig(BaseModel):
-    layers: Dict[str, LayerConfig]
+    layers: dict[str, LayerConfig]
