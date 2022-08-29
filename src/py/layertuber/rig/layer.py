@@ -146,7 +146,7 @@ class Layer(Renderable):
     original_image: Surface
 
     @classmethod
-    def from_layer(cls, rig: Rig, pyora_layer: PyoraLayer) -> 'Layer':
+    def from_layer(cls, rig: Rig, pyora_layer: PyoraLayer) -> Layer:
         instance = super().from_layer(rig, pyora_layer)
         pil_image: Image = pyora_layer.get_image_data(raw=False)
         pil_image = pil_image.resize(rig.target_size)
