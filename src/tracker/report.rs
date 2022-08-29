@@ -1,7 +1,6 @@
 /**
 The types here must reflect the types defined in tracking/report.py
 */
-
 use serde::Deserialize;
 
 #[derive(Deserialize)]
