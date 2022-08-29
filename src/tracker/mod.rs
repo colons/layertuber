@@ -65,15 +65,16 @@ impl RunningTracker {
 
     fn communicate(&mut self) {
         println!("attempting comms");
-        let mut communicator = self.p.communicate_start(None).limit_time(Duration::from_millis(10));
+        let mut communicator = self
+            .p
+            .communicate_start(None)
+            .limit_time(Duration::from_millis(10));
         // ^ XXX we should send a message here asking explicitly for the next frame
 
         match communicator.read_string() {
-            Ok((out, _err)) => {
-                match out {
-                    Some(out) => println!("from tracker: {}", out),
-                    None => (),
-                }
+            Ok((out, _err)) => match out {
+                Some(out) => println!("from tracker: {}", out),
+                None => (),
             },
             Err(e) => {
                 (*self.cleanup)();
