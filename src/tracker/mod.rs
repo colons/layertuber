@@ -9,6 +9,7 @@ use std::time::Duration;
 use subprocess::{ExitStatus, Popen, PopenConfig, PopenError};
 
 mod bin;
+mod report;
 
 #[derive(Debug)]
 pub enum RunTrackerError {

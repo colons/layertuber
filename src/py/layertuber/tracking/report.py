@@ -1,3 +1,7 @@
+"""
+The types here must reflect the types defined in tracker/report.rs
+"""
+
 from typing import Literal, TypedDict
 
 from scipy.spatial.transform import Rotation
