@@ -1,31 +1,48 @@
-use std::thread;
-use std::time::Duration;
+use dirs::cache_dir;
 use std::fs;
-use std::mem::drop;
-use std::os::unix::fs::PermissionsExt;
 use std::fs::File;
 use std::io::Write;
-use dirs::cache_dir;
-use subprocess::{ExitStatus, Popen, PopenConfig};
+use std::mem::drop;
+use std::os::unix::fs::PermissionsExt;
+use std::thread;
+use std::time::Duration;
+use subprocess::{ExitStatus, Popen, PopenConfig, PopenError};
 
 const TRACKER_BIN: &'static [u8] = include_bytes!("py/dist/layertuber");
 
-pub fn run_tracker() {
+enum RunTrackerError {
+    Io(std::io::Error),
+    Popen(PopenError),
+}
+
+impl From<std::io::Error> for RunTrackerError {
+    fn from(err: std::io::Error) -> RunTrackerError {
+        return RunTrackerError::Io(err);
+    }
+}
+
+impl From<PopenError> for RunTrackerError {
+    fn from(err: PopenError) -> RunTrackerError {
+        return RunTrackerError::Popen(err);
+    }
+}
+
+pub fn run_tracker() -> Result<(), RunTrackerError> {
     let cd = match cache_dir() {
         Some(p) => p,
         None => panic!("what's a cache directory"),
     };
     let tracker_bin_path = cd.join("layertuber-tracker");
 
-    let mut tracker_bin = File::create(&tracker_bin_path).expect("failed to create tracker binary");
+    let mut tracker_bin = File::create(&tracker_bin_path)?;
 
-    tracker_bin.write(TRACKER_BIN).expect("failed to write tracker binary");
-    tracker_bin.flush().expect("failed to flush tracker");
+    tracker_bin.write(TRACKER_BIN)?;
+    tracker_bin.flush()?;
 
-    let metadata = tracker_bin.metadata().expect("could not read metadata");
+    let metadata = tracker_bin.metadata()?;
     let mut permissions = metadata.permissions();
     permissions.set_mode(0o700);
-    fs::set_permissions(&tracker_bin_path, permissions).expect("could not make tracker executable");
+    fs::set_permissions(&tracker_bin_path, permissions)?;
 
     drop(tracker_bin);
 
@@ -36,16 +53,13 @@ pub fn run_tracker() {
         };
     };
 
-    let mut p = match Popen::create(&[&tracker_bin_path], PopenConfig {
-        // stdout: redirection::pipe,
-        ..Default::default()
-    }) {
-        Ok(p) => p,
-        Err(e) => {
-            cleanup();
-            panic!("failed to start tracker: {}", e)
-        }
-    };
+    let mut p = Popen::create(
+        &[&tracker_bin_path],
+        PopenConfig {
+            // stdout: redirection::pipe,
+            ..Default::default()
+        },
+    )?;
 
     loop {
         match p.poll() {
