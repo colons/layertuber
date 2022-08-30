@@ -8,7 +8,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use std::thread;
 use std::time::Duration;
-use subprocess::{ExitStatus, Popen, PopenConfig, PopenError, Redirection};
+use subprocess::{Communicator, ExitStatus, Popen, PopenConfig, PopenError, Redirection};
 
 lazy_static! {
     static ref TRACKER_BIN_PATH: PathBuf = cache_dir().unwrap().join("layertuber-tracker");
@@ -36,15 +36,17 @@ impl From<PopenError> for RunTrackerError {
 }
 
 struct RunningTracker {
-    p: Popen,
+    communicator: Communicator,
     cleanup: Box<dyn FnMut() -> ()>,
+    p: Popen,
 }
 
 impl RunningTracker {
-    pub fn new(p: Popen, cleanup: Box<dyn FnMut() -> ()>) -> RunningTracker {
+    pub fn new(mut p: Popen, cleanup: Box<dyn FnMut() -> ()>) -> RunningTracker {
         RunningTracker {
-            p: p,
+            communicator: p.communicate_start(None).limit_size(1),
             cleanup: cleanup,
+            p: p,
         }
     }
 
@@ -64,14 +66,7 @@ impl RunningTracker {
     }
 
     fn communicate(&mut self) {
-        println!("attempting comms");
-        let mut communicator = self
-            .p
-            .communicate_start(None)
-            .limit_time(Duration::from_millis(10));
-        // ^ XXX we should send a message here asking explicitly for the next frame
-
-        match communicator.read_string() {
+        match self.communicator.read_string() {
             Ok((out, _err)) => match out {
                 Some(out) => println!("from tracker: {}", out),
                 None => (),
@@ -81,7 +76,7 @@ impl RunningTracker {
                 eprintln!("no tracking report: {}", e)
             }
         }
-        thread::sleep(Duration::from_secs(1));
+        thread::sleep(Duration::from_millis(1));
     }
 
     pub fn begin(&mut self) {
