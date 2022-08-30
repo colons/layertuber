@@ -4,11 +4,13 @@ pub use report::TrackingReport;
 use serde_json;
 use std::fs;
 use std::fs::File;
-use std::io::Write;
+use std::io::{Read, Write};
 use std::mem::drop;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
-use subprocess::{Communicator, ExitStatus, Popen, PopenConfig, PopenError, Redirection};
+use subprocess::{ExitStatus, Popen, PopenConfig, PopenError, Redirection};
+
+const NEWLINE: u8 = "\n".as_bytes()[0];
 
 lazy_static! {
     static ref TRACKER_BIN_PATH: PathBuf = cache_dir().unwrap().join("layertuber-tracker");
@@ -36,15 +38,13 @@ impl From<PopenError> for RunTrackerError {
 }
 
 pub struct FaceTracker {
-    communicator: Communicator,
     cleanup: Box<dyn FnMut() -> ()>,
     p: Popen,
 }
 
 impl FaceTracker {
-    fn new(mut p: Popen, cleanup: Box<dyn FnMut() -> ()>) -> FaceTracker {
+    fn new(p: Popen, cleanup: Box<dyn FnMut() -> ()>) -> FaceTracker {
         FaceTracker {
-            communicator: p.communicate_start(None).limit_size(1),
             cleanup: cleanup,
             p: p,
         }
@@ -69,22 +69,26 @@ impl FaceTracker {
         let mut line = String::new();
 
         loop {
-            match self.communicator.read_string() {
-                Ok((out, _err)) => match out {
-                    Some(out) => {
-                        line.push_str(&out);
-                        if out == "\n" {
-                            break;
-                        }
+            let mut one_char_buf: [u8; 1] = [0];
+
+            match self.p.stdout.as_ref().unwrap().read(&mut one_char_buf) {
+                Ok(size) => {
+                    if size != 1 {
+                        panic!("got {}-length read when line was: {}", size, line)
                     }
-                    None => (),
-                },
+                    if one_char_buf == [NEWLINE] {
+                        break;
+                    }
+                    line.push(one_char_buf[0] as char);
+                }
                 Err(e) => {
                     (*self.cleanup)();
                     panic!("no tracking report: {}", e);
                 }
             }
         }
+
+        self.p.stdin.as_ref().unwrap().write(&[NEWLINE]).unwrap();
 
         line
     }
@@ -104,7 +108,7 @@ impl Iterator for FaceTracker {
     }
 }
 
-pub fn run_tracker() -> Result<FaceTracker, RunTrackerError> {
+pub fn run_tracker<'a>() -> Result<FaceTracker, RunTrackerError> {
     let mut tracker_bin = File::create(TRACKER_BIN_PATH.as_path())?;
 
     tracker_bin.write(bin::TRACKER_BIN)?;
@@ -120,6 +124,7 @@ pub fn run_tracker() -> Result<FaceTracker, RunTrackerError> {
     let p = Popen::create(
         &[TRACKER_BIN_PATH.as_path()],
         PopenConfig {
+            stdin: Redirection::Pipe,
             stdout: Redirection::Pipe,
             ..Default::default()
         },
