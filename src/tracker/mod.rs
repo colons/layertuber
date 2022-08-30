@@ -6,8 +6,6 @@ use std::io::Write;
 use std::mem::drop;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
-use std::thread;
-use std::time::Duration;
 use subprocess::{Communicator, ExitStatus, Popen, PopenConfig, PopenError, Redirection};
 
 lazy_static! {
@@ -65,24 +63,34 @@ impl RunningTracker {
         };
     }
 
-    fn communicate(&mut self) {
-        match self.communicator.read_string() {
-            Ok((out, _err)) => match out {
-                Some(out) => println!("from tracker: {}", out),
-                None => (),
-            },
-            Err(e) => {
-                (*self.cleanup)();
-                eprintln!("no tracking report: {}", e)
+    fn read_line(&mut self) -> String {
+        let mut line = String::new();
+
+        loop {
+            match self.communicator.read_string() {
+                Ok((out, _err)) => match out {
+                    Some(out) => {
+                        line.push_str(&out);
+                        if out == "\n" {
+                            break
+                        }
+                    }
+                    None => (),
+                },
+                Err(e) => {
+                    (*self.cleanup)();
+                    eprintln!("no tracking report: {}", e);
+                }
             }
         }
-        thread::sleep(Duration::from_millis(1));
+
+        line
     }
 
     pub fn begin(&mut self) {
         loop {
             self.poll();
-            self.communicate();
+            println!("from tracker: {}", self.read_line());
         }
     }
 }
