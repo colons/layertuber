@@ -1,5 +1,6 @@
 use dirs::cache_dir;
 use lazy_static::lazy_static;
+use report::TrackingReport;
 use serde_json;
 use std::fs;
 use std::fs::File;
@@ -8,7 +9,6 @@ use std::mem::drop;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use subprocess::{Communicator, ExitStatus, Popen, PopenConfig, PopenError, Redirection};
-use report::TrackingReport;
 
 lazy_static! {
     static ref TRACKER_BIN_PATH: PathBuf = cache_dir().unwrap().join("layertuber-tracker");
