@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from sys import stdout
 from typing import Optional
 
 import orjson
@@ -19,4 +20,4 @@ def default(o: object) -> object:
 class Reporter:
     def report(self, report: Optional[TrackingReport]) -> None:
         if report is not None:
-            print(orjson.dumps(report, default=default, option=orjson.OPT_SERIALIZE_NUMPY))
+            stdout.buffer.write(orjson.dumps(report, default=default, option=orjson.OPT_SERIALIZE_NUMPY))
