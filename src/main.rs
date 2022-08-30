@@ -5,7 +5,11 @@ mod tracker;
 
 fn main() {
     thread::spawn(|| {
-        tracker::run_tracker().expect("could not start tracker");
+        puppet::run_puppet();
     });
-    puppet::run_puppet()
+
+    let tracker = tracker::run_tracker().expect("could not start tracker");
+    for report in tracker {
+        println!("{}", report)
+    }
 }

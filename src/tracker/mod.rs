@@ -33,15 +33,15 @@ impl From<PopenError> for RunTrackerError {
     }
 }
 
-struct RunningTracker {
+pub struct FaceTracker {
     communicator: Communicator,
     cleanup: Box<dyn FnMut() -> ()>,
     p: Popen,
 }
 
-impl RunningTracker {
-    pub fn new(mut p: Popen, cleanup: Box<dyn FnMut() -> ()>) -> RunningTracker {
-        RunningTracker {
+impl FaceTracker {
+    fn new(mut p: Popen, cleanup: Box<dyn FnMut() -> ()>) -> FaceTracker {
+        FaceTracker {
             communicator: p.communicate_start(None).limit_size(1),
             cleanup: cleanup,
             p: p,
@@ -86,16 +86,18 @@ impl RunningTracker {
 
         line
     }
+}
 
-    pub fn begin(&mut self) {
-        loop {
-            self.poll();
-            println!("from tracker: {}", self.read_line());
-        }
+impl Iterator for FaceTracker {
+    type Item = String;
+
+    fn next(&mut self) -> Option<String> {
+        self.poll();
+        Some(self.read_line())
     }
 }
 
-pub fn run_tracker() -> Result<(), RunTrackerError> {
+pub fn run_tracker() -> Result<FaceTracker, RunTrackerError> {
     let mut tracker_bin = File::create(TRACKER_BIN_PATH.as_path())?;
 
     tracker_bin.write(bin::TRACKER_BIN)?;
@@ -116,7 +118,7 @@ pub fn run_tracker() -> Result<(), RunTrackerError> {
         },
     )?;
 
-    let mut tracker = RunningTracker::new(
+    let tracker = FaceTracker::new(
         p,
         Box::new(|| {
             match fs::remove_file(TRACKER_BIN_PATH.as_path()) {
@@ -125,7 +127,6 @@ pub fn run_tracker() -> Result<(), RunTrackerError> {
             };
         }),
     );
-    tracker.begin();
 
-    Ok(())
+    Ok(tracker)
 }
