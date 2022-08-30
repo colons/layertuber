@@ -1,6 +1,5 @@
 import logging
-from queue import Queue
-from typing import Literal, Optional
+from typing import Iterator, Literal, Optional
 
 import cv2
 
@@ -24,8 +23,6 @@ NEXT_FRAME: TrackerControlEvent = 'next_frame'
 
 
 class FaceTracker:
-    control_queue: Queue[TrackerControlEvent]
-    report_queue: Queue[Optional[TrackingReport]]
     reader: InputReader
     tracker: Tracker
     height: int
@@ -35,13 +32,9 @@ class FaceTracker:
 
     def __init__(
         self,
-        control_queue: Queue[TrackerControlEvent],
-        report_queue: Queue[Optional[TrackingReport]],
         capture: int = 0,
         show_features: bool = False,
     ) -> None:
-        self.control_queue = control_queue
-        self.report_queue = report_queue
         self.reader = InputReader(
             capture=capture, raw_rgb=False, width=REQUEST_INPUT_WIDTH, height=REQUEST_INPUT_HEIGHT, fps=30
         )
@@ -147,10 +140,6 @@ class FaceTracker:
 
         return report
 
-    def begin_loop(self) -> None:
+    def begin_loop(self) -> Iterator[Optional[TrackingReport]]:
         while self.reader.is_open():
-            event = self.control_queue.get()
-            if event == CALIBRATE:
-                self.calibrate()
-            elif event == NEXT_FRAME:
-                self.report_queue.put(self.get_report())
+            yield self.get_report()

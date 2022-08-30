@@ -1,9 +1,6 @@
 import argparse
 import logging
 import os
-from queue import Queue
-from threading import Thread
-from typing import Optional
 
 
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'true'
@@ -27,29 +24,14 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
-    from layertuber.tracking.face import FaceTracker, TrackerControlEvent
-    from layertuber.tracking.report import TrackingReport
+    from layertuber.tracking.face import FaceTracker
     from layertuber.reporter import Reporter
 
     args = _parse_args()
 
-    report_queue: Queue[Optional[TrackingReport]] = Queue()
-    tracker_event_queue: Queue[TrackerControlEvent] = Queue()
-
-    def run_tracker() -> None:
-        FaceTracker(
-            tracker_event_queue, report_queue, capture=args.camera, show_features=args.show_features
-        ).begin_loop()
-
-    tracker_process = Thread(target=run_tracker, daemon=True)
-    tracker_process.start()
-
-    def run_reporter() -> None:
-        Reporter(report_queue, tracker_event_queue).begin_loop()
-
-    reporter_process = Thread(target=run_reporter)
-    reporter_process.start()
-    reporter_process.join()
+    reporter = Reporter()
+    for report in FaceTracker(capture=args.camera, show_features=args.show_features).begin_loop():
+        reporter.report(report)
 
 
 if __name__ == '__main__':
