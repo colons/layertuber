@@ -79,7 +79,7 @@ impl RunningTracker {
                 },
                 Err(e) => {
                     (*self.cleanup)();
-                    eprintln!("no tracking report: {}", e);
+                    panic!("no tracking report: {}", e);
                 }
             }
         }
