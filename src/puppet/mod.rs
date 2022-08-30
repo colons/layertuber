@@ -2,8 +2,8 @@ use crate::tracker::TrackingReport;
 use std::sync::mpsc::Receiver;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
-    degrees, radians, vec3, Camera, ClearState, Color, ColorMaterial, CpuMesh, FrameInput,
-    FrameOutput, Gm, Mat4, Mesh, Positions,
+    degrees, vec3, Camera, ClearState, Color, ColorMaterial, CpuMesh, FrameInput, FrameOutput, Gm,
+    Mat4, Mesh, Positions, Quaternion,
 };
 
 pub fn run_puppet(rx: Receiver<TrackingReport>) {
@@ -46,12 +46,15 @@ pub fn run_puppet(rx: Receiver<TrackingReport>) {
     let mut model = Gm::new(Mesh::new(&context, &mesh), ColorMaterial::default());
 
     window.render_loop(move |frame_input: FrameInput| {
-        dbg!(rx.recv().unwrap());
+        let report = rx.recv().unwrap();
 
         camera.set_viewport(frame_input.viewport);
 
-        model.set_transformation(Mat4::from_angle_y(radians(
-            (frame_input.accumulated_time * 0.005) as f32,
+        model.set_transformation(Mat4::from(Quaternion::new(
+            report.head_rotation[3],
+            report.head_rotation[0],
+            report.head_rotation[1],
+            report.head_rotation[2],
         )));
 
         frame_input
