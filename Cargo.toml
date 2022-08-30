@@ -8,8 +8,9 @@ subprocess = "0.2.9"
 
 [dependencies]
 dirs = "4.0"
-lazy_static = "1.4.0"
+lazy_static = "1.4"
 serde = { version = "1.0", features = ["serde_derive"] }
 serde_json = "1.0"
 subprocess = "0.2"
-three-d = "0.13.0"
+three-d = "0.13"
+zip = "0.6"
