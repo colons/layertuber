@@ -21,3 +21,4 @@ class Reporter:
     def report(self, report: Optional[TrackingReport]) -> None:
         if report is not None:
             stdout.buffer.write(orjson.dumps(report, default=default, option=orjson.OPT_SERIALIZE_NUMPY))
+            stdout.buffer.write(b'\n')
