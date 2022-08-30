@@ -1,4 +1,5 @@
 use crate::tracker::TrackingReport;
+use std::path::Path;
 use std::sync::mpsc::Receiver;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
@@ -6,7 +7,11 @@ use three_d::{
     Mat4, Mesh, Positions, Quaternion,
 };
 
+mod rig;
+
 pub fn run_puppet(rx: Receiver<TrackingReport>) {
+    let rig = rig::Rig::open(&Path::new("examples/demo/demo.ora"));
+
     let window = Window::new(WindowSettings {
         title: "layertuber".to_string(),
         ..Default::default()
