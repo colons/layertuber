@@ -72,7 +72,7 @@ impl RunningTracker {
                     Some(out) => {
                         line.push_str(&out);
                         if out == "\n" {
-                            break
+                            break;
                         }
                     }
                     None => (),
