@@ -3,7 +3,7 @@ The types here must reflect the types defined in tracking/report.py
 */
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct TrackingReport {
     pub blink_left: f32,
     pub blink_right: f32,

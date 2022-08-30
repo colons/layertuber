@@ -1,5 +1,6 @@
 use dirs::cache_dir;
 use lazy_static::lazy_static;
+use serde_json;
 use std::fs;
 use std::fs::File;
 use std::io::Write;
@@ -7,6 +8,7 @@ use std::mem::drop;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
 use subprocess::{Communicator, ExitStatus, Popen, PopenConfig, PopenError, Redirection};
+use report::TrackingReport;
 
 lazy_static! {
     static ref TRACKER_BIN_PATH: PathBuf = cache_dir().unwrap().join("layertuber-tracker");
@@ -89,11 +91,16 @@ impl FaceTracker {
 }
 
 impl Iterator for FaceTracker {
-    type Item = String;
+    type Item = TrackingReport;
 
-    fn next(&mut self) -> Option<String> {
+    fn next(&mut self) -> Option<TrackingReport> {
         self.poll();
-        Some(self.read_line())
+        let line = self.read_line();
+        let report: TrackingReport = match serde_json::from_str(&line) {
+            Ok(r) => r,
+            Err(e) => panic!("got bad data from tracker: {} ({})", line, e),
+        };
+        Some(report)
     }
 }
 

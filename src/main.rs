@@ -10,6 +10,6 @@ fn main() {
 
     let tracker = tracker::run_tracker().expect("could not start tracker");
     for report in tracker {
-        println!("{}", report)
+        dbg!(report);
     }
 }
