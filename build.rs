@@ -14,6 +14,8 @@ fn main() {
             "layertuber/vendor/OpenSeeFace/",
             "--collect-data",
             "layertuber",
+            "--collect-data",
+            "OpenSeeFace",
             "--name",
             "layertuber",
             "layertuber/__init__.py",
