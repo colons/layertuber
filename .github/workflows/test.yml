@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/setup
-      - run: cargo build -r
+      - run: cargo build -r && du -sh target/release/layertuber
 
   rustfmt:
     runs-on: ubuntu-latest
