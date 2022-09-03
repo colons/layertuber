@@ -7,6 +7,7 @@ use three_d::{
     Mat4, Mesh, Positions, Quaternion,
 };
 
+mod ora;
 mod rig;
 
 pub fn run_puppet(rx: Receiver<TrackingReport>) {
