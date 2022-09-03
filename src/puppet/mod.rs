@@ -11,7 +11,8 @@ mod ora;
 mod rig;
 
 pub fn run_puppet(rx: Receiver<TrackingReport>) {
-    let rig = rig::Rig::open(&Path::new("examples/demo/demo.ora"));
+    let rig = rig::Rig::open(&Path::new("examples/demo/demo.ora")).unwrap();
+    dbg!(rig);
 
     let window = Window::new(WindowSettings {
         title: "layertuber".to_string(),
