@@ -2,8 +2,8 @@ use crate::tracker::TrackingReport;
 use std::sync::mpsc::Receiver;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
-    degrees, vec3, Camera, ClearState, Color, ColorMaterial, CpuMesh, FrameInput, FrameOutput, Gm,
-    Mat4, Mesh, Positions, Quaternion,
+    degrees, vec3, Camera, ClearState, ColorMaterial, CpuMesh, FrameInput, FrameOutput, Gm, Mat4,
+    Mesh, Quaternion,
 };
 
 pub fn render(rx: Receiver<TrackingReport>, rig: crate::puppet::rig::Rig) {
@@ -25,25 +25,10 @@ pub fn render(rx: Receiver<TrackingReport>, rig: crate::puppet::rig::Rig) {
         10.0,
     );
 
-    let positions = vec![
-        vec3(0.5, -0.5, 0.0),
-        vec3(-0.5, -0.5, 0.0),
-        vec3(0.0, 0.5, 0.0),
-    ];
-
-    let colors = vec![
-        Color::new(0xdd, 0x66, 0x66, 255),
-        Color::new(0x66, 0xdd, 0x66, 255),
-        Color::new(0x66, 0x66, 0xdd, 255),
-    ];
-
-    let mesh = CpuMesh {
-        positions: Positions::F32(positions),
-        colors: Some(colors),
-        ..Default::default()
-    };
-
-    let mut model = Gm::new(Mesh::new(&context, &mesh), ColorMaterial::default());
+    let mut model = Gm::new(
+        Mesh::new(&context, &CpuMesh::square()),
+        ColorMaterial::default(),
+    );
 
     window.render_loop(move |frame_input: FrameInput| {
         let report = rx.recv().unwrap();
