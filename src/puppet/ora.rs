@@ -1,10 +1,8 @@
-use serde_xml_rs::de::from_str;
-use std::fs::File;
-use std::io;
-use std::io::Read;
-use std::path::Path;
-use zip::read::ZipArchive;
 use serde::Deserialize;
+use serde_xml_rs::de::from_str;
+use std::io;
+use std::io::{Read, Seek};
+use zip::read::ZipArchive;
 
 #[derive(Debug, Deserialize)]
 struct Layer {
@@ -37,19 +35,14 @@ fn paths_from_stack(stack: Stack) -> Vec<String> {
     paths
 }
 
-pub fn layer_names(ora_path: &Path) -> io::Result<Vec<String>> {
-    let mut ora = ZipArchive::new(File::open(ora_path)?)?;
-
+pub fn layer_names(ora: &mut ZipArchive<impl Read + Seek>) -> io::Result<Vec<String>> {
     let mut mimetype = String::new();
     ora.by_name("mimetype")?.read_to_string(&mut mimetype)?;
 
     if mimetype != "image/openraster" {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
-            format!(
-                "{} does not appear to be an OpenRaster file",
-                ora_path.display()
-            ),
+            "this file does not appear to be an OpenRaster file",
         ));
     }
 
