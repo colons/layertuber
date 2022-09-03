@@ -8,7 +8,8 @@ pub struct Rig {
 
 impl Rig {
     pub fn open(ora_path: &Path) -> io::Result<Rig> {
-        dbg!(&ora::layer_names(ora_path)?);
+        let paths = ora::layer_names(ora_path)?;
+        dbg!(&paths);
 
         Ok(Rig {
             layers: Vec::from([]),

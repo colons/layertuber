@@ -63,5 +63,7 @@ pub fn layer_names(ora_path: &Path) -> io::Result<Vec<String>> {
         layer_names.push(path);
     }
 
+    layer_names.reverse();
+
     Ok(layer_names)
 }
