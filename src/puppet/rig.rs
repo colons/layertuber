@@ -12,6 +12,7 @@ pub struct RigLayer {
     pub texture: Texture2D,
     pub x: i32,
     pub y: i32,
+    pub name: String,
 }
 
 #[derive(Debug)]
@@ -34,6 +35,7 @@ impl Rig {
             ora.by_name(&ora_layer.src)?.read_to_end(&mut buf)?;
             assets.insert(&ora_layer.src, buf);
             layers.push(RigLayer {
+                name: ora_layer.name,
                 x: ora_layer.x,
                 y: ora_layer.y,
                 texture: assets
