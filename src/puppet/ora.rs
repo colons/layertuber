@@ -63,7 +63,6 @@ pub fn read(ora: &mut ZipArchive<impl Read + Seek>) -> io::Result<(u32, u32, Vec
 
     let mut stack_xml = String::new();
     ora.by_name("stack.xml")?.read_to_string(&mut stack_xml)?;
-    println!("{}", stack_xml);
     let image: Image = from_str(&stack_xml).expect("this should probably be returned as an error");
 
     let mut layers = Vec::new();
