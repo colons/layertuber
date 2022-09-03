@@ -24,6 +24,19 @@ struct Stack {
     entries: Vec<StackEntry>,
 }
 
+fn paths_from_stack(stack: Stack) -> Vec<String> {
+    let mut paths = Vec::new();
+
+    for entry in stack.entries {
+        match entry {
+            StackEntry::Layer(l) => paths.push(l.src),
+            StackEntry::Stack(s) => paths.extend_from_slice(&paths_from_stack(s)),
+        }
+    }
+
+    paths
+}
+
 pub fn layer_names(ora_path: &Path) -> io::Result<Vec<String>> {
     let mut ora = ZipArchive::new(File::open(ora_path)?)?;
 
@@ -43,7 +56,12 @@ pub fn layer_names(ora_path: &Path) -> io::Result<Vec<String>> {
     let mut stack_xml = String::new();
     ora.by_name("stack.xml")?.read_to_string(&mut stack_xml)?;
     let stack: Stack = from_str(&stack_xml).expect("this should probably be returned as an error");
-    dbg!(&stack);
 
-    Ok(Vec::new())
+    let mut layer_names = Vec::new();
+
+    for path in paths_from_stack(stack) {
+        layer_names.push(path);
+    }
+
+    Ok(layer_names)
 }
