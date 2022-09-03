@@ -4,9 +4,12 @@ use std::io;
 use std::io::{Read, Seek};
 use zip::read::ZipArchive;
 
-#[derive(Debug, Deserialize)]
-struct Layer {
-    src: String,
+#[derive(Clone, Debug, Deserialize)]
+pub struct Layer {
+    pub name: String,
+    pub src: String,
+    pub x: i32,
+    pub y: i32,
 }
 
 #[derive(Debug, Deserialize)]
@@ -22,20 +25,32 @@ struct Stack {
     entries: Vec<StackEntry>,
 }
 
-fn paths_from_stack(stack: Stack) -> Vec<String> {
-    let mut paths = Vec::new();
+#[derive(Debug, Deserialize)]
+struct Image {
+    #[serde(rename = "$value")]
+    entries: Vec<StackEntry>,
 
-    for entry in stack.entries {
+    #[serde(rename = "w")]
+    width: u32,
+
+    #[serde(rename = "h")]
+    height: u32,
+}
+
+fn layers_from_stack(entries: Vec<StackEntry>) -> Vec<Layer> {
+    let mut layers: Vec<Layer> = Vec::new();
+
+    for entry in entries {
         match entry {
-            StackEntry::Layer(l) => paths.push(l.src),
-            StackEntry::Stack(s) => paths.extend_from_slice(&paths_from_stack(s)),
+            StackEntry::Layer(l) => layers.push(l),
+            StackEntry::Stack(s) => layers.extend_from_slice(&layers_from_stack(s.entries)),
         }
     }
 
-    paths
+    layers
 }
 
-pub fn layer_names(ora: &mut ZipArchive<impl Read + Seek>) -> io::Result<Vec<String>> {
+pub fn read(ora: &mut ZipArchive<impl Read + Seek>) -> io::Result<(u32, u32, Vec<Layer>)> {
     let mut mimetype = String::new();
     ora.by_name("mimetype")?.read_to_string(&mut mimetype)?;
 
@@ -48,15 +63,16 @@ pub fn layer_names(ora: &mut ZipArchive<impl Read + Seek>) -> io::Result<Vec<Str
 
     let mut stack_xml = String::new();
     ora.by_name("stack.xml")?.read_to_string(&mut stack_xml)?;
-    let stack: Stack = from_str(&stack_xml).expect("this should probably be returned as an error");
+    println!("{}", stack_xml);
+    let image: Image = from_str(&stack_xml).expect("this should probably be returned as an error");
 
-    let mut layer_names = Vec::new();
+    let mut layers = Vec::new();
 
-    for path in paths_from_stack(stack) {
-        layer_names.push(path);
+    for path in layers_from_stack(image.entries) {
+        layers.push(path);
     }
 
-    layer_names.reverse();
+    layers.reverse();
 
-    Ok(layer_names)
+    Ok((image.width, image.height, layers))
 }

@@ -8,13 +8,17 @@ use three_d_asset::Texture2D;
 use zip::read::ZipArchive;
 
 #[derive(Debug)]
-pub struct Layer {
+pub struct RigLayer {
     pub texture: Texture2D,
+    pub x: i32,
+    pub y: i32,
 }
 
 #[derive(Debug)]
 pub struct Rig {
-    pub layers: Vec<Layer>,
+    pub width: u32,
+    pub height: u32,
+    pub layers: Vec<RigLayer>,
 }
 
 impl Rig {
@@ -23,17 +27,25 @@ impl Rig {
         let mut layers = Vec::new();
         let mut assets = RawAssets::new();
 
-        for path in ora::layer_names(&mut ora)? {
+        let (width, height, ora_layers) = ora::read(&mut ora)?;
+
+        for ora_layer in ora_layers {
             let mut buf = Vec::new();
-            ora.by_name(&path)?.read_to_end(&mut buf)?;
-            assets.insert(&path, buf);
-            layers.push(Layer {
+            ora.by_name(&ora_layer.src)?.read_to_end(&mut buf)?;
+            assets.insert(&ora_layer.src, buf);
+            layers.push(RigLayer {
+                x: ora_layer.x,
+                y: ora_layer.y,
                 texture: assets
-                    .deserialize(&path)
+                    .deserialize(&ora_layer.src)
                     .expect("this expect should be a question mark"),
             });
         }
 
-        Ok(Rig { layers: layers })
+        Ok(Rig {
+            width: width,
+            height: height,
+            layers: layers,
+        })
     }
 }
