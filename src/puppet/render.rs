@@ -39,6 +39,15 @@ impl RenderLayer {
 
         render_layers
     }
+
+    fn apply_transformation(&mut self, report: &TrackingReport) -> () {
+        self.model.set_transformation(Mat4::from(Quaternion::new(
+            report.head_rotation[3],
+            report.head_rotation[0],
+            report.head_rotation[1],
+            report.head_rotation[2],
+        )));
+    }
 }
 
 pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
@@ -71,14 +80,7 @@ pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
         target.clear(ClearState::color_and_depth(0.0, 1.0, 0.0, 1.0, 1.0));
 
         for render_layer in &mut render_layers {
-            render_layer
-                .model
-                .set_transformation(Mat4::from(Quaternion::new(
-                    report.head_rotation[3],
-                    report.head_rotation[0],
-                    report.head_rotation[1],
-                    report.head_rotation[2],
-                )));
+            render_layer.apply_transformation(&report);
             target.render(&camera, &[&render_layer.model], &[]);
             target.clear(ClearState::depth(1.0));
         }
