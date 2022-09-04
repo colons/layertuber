@@ -1,15 +1,44 @@
-use crate::puppet::rig::Rig;
+use crate::puppet::rig::{Rig, RigLayer};
 use crate::tracker::TrackingReport;
 use std::sync::mpsc::Receiver;
 use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
-    degrees, vec3, Blend, Camera, ClearState, ColorMaterial, CpuMesh, FrameInput, FrameOutput, Gm,
-    Mat4, Mesh, Quaternion, RenderStates, Texture2D,
+    degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, FrameInput,
+    FrameOutput, Gm, Mat4, Mesh, Quaternion, RenderStates, Texture2D,
 };
 
 struct RenderLayer {
     model: Gm<Mesh, ColorMaterial>,
+}
+
+impl RenderLayer {
+    fn from_rig_layer(rig_layer: &RigLayer, context: &Context) -> RenderLayer {
+        RenderLayer {
+            model: Gm::new(
+                Mesh::new(&context, &CpuMesh::square()),
+                ColorMaterial {
+                    texture: Some(Arc::new(Texture2D::new(&context, &rig_layer.texture))),
+                    is_transparent: true,
+                    render_states: RenderStates {
+                        blend: Blend::TRANSPARENCY,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+            ),
+        }
+    }
+
+    fn from_rig(rig: &Rig, context: &Context) -> Vec<RenderLayer> {
+        let mut render_layers = Vec::new();
+
+        for rig_layer in &rig.layers {
+            render_layers.push(RenderLayer::from_rig_layer(rig_layer, context))
+        }
+
+        render_layers
+    }
 }
 
 pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
@@ -31,24 +60,7 @@ pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
         10.0,
     );
 
-    let mut render_layers: Vec<RenderLayer> = Vec::new();
-
-    for rig_layer in &rig.layers {
-        render_layers.push(RenderLayer {
-            model: Gm::new(
-                Mesh::new(&context, &CpuMesh::square()),
-                ColorMaterial {
-                    texture: Some(Arc::new(Texture2D::new(&context, &rig_layer.texture))),
-                    is_transparent: true,
-                    render_states: RenderStates {
-                        blend: Blend::TRANSPARENCY,
-                        ..Default::default()
-                    },
-                    ..Default::default()
-                },
-            ),
-        })
-    }
+    let mut render_layers: Vec<RenderLayer> = RenderLayer::from_rig(&rig, &context);
 
     window.render_loop(move |frame_input: FrameInput| {
         let report = rx.recv().unwrap();
