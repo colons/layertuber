@@ -17,8 +17,9 @@ struct RenderLayer {
 impl RenderLayer {
     fn from_rig_layer(rig: &Rig, rig_layer: &RigLayer, context: &Context) -> RenderLayer {
         let base_transformation = Mat4::from_nonuniform_scale(
-            1.0,
-            (rig_layer.texture.height as f32) / (rig_layer.texture.width as f32),
+            (rig_layer.texture.width as f32) / (rig.width as f32),
+            ((rig_layer.texture.height as f32) / (rig.height as f32))
+                * ((rig_layer.texture.height as f32) / (rig_layer.texture.width as f32)),
             1.0,
         );
 

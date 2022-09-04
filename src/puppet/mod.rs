@@ -8,6 +8,6 @@ mod render;
 mod rig;
 
 pub fn run_puppet(rx: Receiver<TrackingReport>) {
-    let rig = rig::Rig::open(&Path::new("examples/demo/demo.ora")).unwrap();
+    let rig = rig::Rig::open(&Path::new("examples/stick figure/stick figure.ora")).unwrap();
     render::render(rx, rig);
 }
