@@ -42,10 +42,12 @@ impl RenderLayer {
 
     fn apply_transformation(&mut self, report: &TrackingReport) -> () {
         self.model.set_transformation(Mat4::from(Quaternion::new(
+            // this ordering is weird because scipy deals in quats scalar-last, but three_d's are scalar-first
             report.head_rotation[3],
-            report.head_rotation[0],
-            report.head_rotation[1],
-            report.head_rotation[2],
+            // invert these to make the puppet behave like a mirror
+            -report.head_rotation[0], // pitch
+            -report.head_rotation[1], // yaw
+            -report.head_rotation[2], // roll
         )));
     }
 }
