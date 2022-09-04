@@ -1,15 +1,16 @@
+use crate::puppet::conv::from_asset;
 use crate::puppet::ora;
 use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::path::Path;
+use three_d::CpuTexture;
 use three_d_asset::io::RawAssets;
-use three_d_asset::Texture2D;
 use zip::read::ZipArchive;
 
 #[derive(Debug)]
 pub struct RigLayer {
-    pub texture: Texture2D,
+    pub texture: CpuTexture,
     pub x: i32,
     pub y: i32,
     pub name: String,
@@ -38,9 +39,11 @@ impl Rig {
                 name: ora_layer.name,
                 x: ora_layer.x,
                 y: ora_layer.y,
-                texture: assets
-                    .deserialize(&ora_layer.src)
-                    .expect("this expect should be a question mark"),
+                texture: from_asset(
+                    assets
+                        .deserialize(&ora_layer.src)
+                        .expect("this expect should be a question mark"),
+                ),
             });
         }
 
