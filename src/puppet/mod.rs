@@ -2,6 +2,7 @@ use crate::tracker::TrackingReport;
 use std::path::Path;
 use std::sync::mpsc::Receiver;
 
+mod config;
 mod conv;
 mod ora;
 mod render;
