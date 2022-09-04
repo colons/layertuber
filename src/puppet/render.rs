@@ -1,12 +1,14 @@
+use crate::puppet::rig::Rig;
 use crate::tracker::TrackingReport;
 use std::sync::mpsc::Receiver;
+use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
     degrees, vec3, Camera, ClearState, ColorMaterial, CpuMesh, FrameInput, FrameOutput, Gm, Mat4,
-    Mesh, Quaternion,
+    Mesh, Quaternion, Texture2D,
 };
 
-pub fn render(rx: Receiver<TrackingReport>, rig: crate::puppet::rig::Rig) {
+pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
     let window = Window::new(WindowSettings {
         title: "layertuber".to_string(),
         ..Default::default()
@@ -27,7 +29,10 @@ pub fn render(rx: Receiver<TrackingReport>, rig: crate::puppet::rig::Rig) {
 
     let mut model = Gm::new(
         Mesh::new(&context, &CpuMesh::square()),
-        ColorMaterial::default(),
+        ColorMaterial {
+            texture: Some(Arc::new(Texture2D::new(&context, &rig.layers[1].texture))),
+            ..Default::default()
+        },
     );
 
     window.render_loop(move |frame_input: FrameInput| {
