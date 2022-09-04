@@ -6,16 +6,24 @@ use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
     degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, FrameInput,
-    FrameOutput, Gm, Mat4, Mesh, Quaternion, RenderStates, SquareMatrix, Texture2D,
+    FrameOutput, Gm, Mat4, Mesh, Quaternion, RenderStates, Texture2D,
 };
 
 struct RenderLayer {
     model: Gm<Mesh, ColorMaterial>,
+    base_transformation: Mat4,
 }
 
 impl RenderLayer {
-    fn from_rig_layer(rig_layer: &RigLayer, context: &Context) -> RenderLayer {
+    fn from_rig_layer(rig: &Rig, rig_layer: &RigLayer, context: &Context) -> RenderLayer {
+        let base_transformation = Mat4::from_nonuniform_scale(
+            1.0,
+            (rig_layer.texture.height as f32) / (rig_layer.texture.width as f32),
+            1.0,
+        );
+
         RenderLayer {
+            base_transformation: base_transformation,
             model: Gm::new(
                 Mesh::new(&context, &CpuMesh::square()),
                 ColorMaterial {
@@ -35,7 +43,7 @@ impl RenderLayer {
         let mut render_layers = Vec::new();
 
         for rig_layer in &rig.layers {
-            render_layers.push(RenderLayer::from_rig_layer(rig_layer, context))
+            render_layers.push(RenderLayer::from_rig_layer(rig, rig_layer, context))
         }
 
         render_layers
@@ -53,7 +61,7 @@ impl RenderLayer {
     }
 
     fn apply_transformation(&mut self, report: &TrackingReport) -> () {
-        let mut transformation = Mat4::identity();
+        let mut transformation = self.base_transformation;
 
         transformation = transformation.mul(self.rotation(report));
 
