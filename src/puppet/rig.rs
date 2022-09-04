@@ -31,8 +31,7 @@ impl Rig {
         let mut layers = Vec::new();
         let mut assets = RawAssets::new();
 
-        let config = config::load(ora_path)?;
-        dbg!(&config);
+        let mut config = config::load(ora_path)?;
         let (width, height, ora_layers) = ora::read(&mut ora)?;
 
         for ora_layer in ora_layers {
@@ -40,10 +39,19 @@ impl Rig {
             ora.by_name(&ora_layer.src)?.read_to_end(&mut buf)?;
             assets.insert(&ora_layer.src, buf);
             layers.push(RigLayer {
-                name: ora_layer.name,
                 x: ora_layer.x,
                 y: ora_layer.y,
-                config: config::LayerConfig::default(), // XXX get this from the real config file
+                config: match config.layers.remove(&ora_layer.name) {
+                    Some(c) => c,
+                    None => {
+                        eprintln!(
+                            "{} present in image but not present in config file",
+                            ora_layer.name
+                        );
+                        config::LayerConfig::default()
+                    }
+                },
+                name: ora_layer.name,
                 texture: from_asset(
                     assets
                         .deserialize(&ora_layer.src)
@@ -51,6 +59,8 @@ impl Rig {
                 ),
             });
         }
+
+        // XXX print out the remaining config keys, since they're probably misconfigs
 
         Ok(Rig {
             width: width,

@@ -1,3 +1,4 @@
+use crate::puppet::config;
 use crate::puppet::rig::{Rig, RigLayer};
 use crate::tracker::TrackingReport;
 use core::ops::Mul;
@@ -12,6 +13,7 @@ use three_d::{
 struct RenderLayer {
     model: Gm<Mesh, ColorMaterial>,
     base_transformation: Mat4,
+    config: config::LayerConfig,
 }
 
 impl RenderLayer {
@@ -37,6 +39,7 @@ impl RenderLayer {
 
         RenderLayer {
             base_transformation: translation.mul(scale.mul(Mat4::identity())),
+            config: rig_layer.config,
             model: Gm::new(
                 Mesh::new(&context, &CpuMesh::square()),
                 ColorMaterial {
@@ -109,6 +112,10 @@ pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
         target.clear(ClearState::color_and_depth(0.0, 1.0, 0.0, 1.0, 1.0));
 
         for render_layer in &mut render_layers {
+            if !render_layer.config.visible {
+                continue;
+            }
+
             render_layer.apply_transformation(&report);
             target.render(&camera, &[&render_layer.model], &[]);
             target.clear(ClearState::depth(1.0));

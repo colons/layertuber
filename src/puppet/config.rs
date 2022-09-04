@@ -1,21 +1,33 @@
+use serde::Deserialize;
+use serde_yaml::from_str;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::path::Path;
 
-#[derive(Debug)]
+fn default_visible() -> bool {
+    true
+}
+
+#[derive(Debug, Deserialize, Copy, Clone)]
 pub struct LayerConfig {
+    #[serde(default = "default_visible")]
     pub visible: bool,
 }
 
 impl Default for LayerConfig {
     fn default() -> LayerConfig {
-        LayerConfig { visible: true }
+        from_str("").unwrap()
     }
 }
 
-// XXX this should return a hashmap keyed by name
-pub fn load(ora_path: &Path) -> io::Result<LayerConfig> {
+#[derive(Debug, Deserialize)]
+pub struct Config {
+    pub layers: HashMap<String, LayerConfig>,
+}
+
+pub fn load(ora_path: &Path) -> io::Result<Config> {
     let mut config_string = String::new();
     let config_path = ora_path.with_file_name(format!(
         "{}.layertuber.yaml",
@@ -24,10 +36,7 @@ pub fn load(ora_path: &Path) -> io::Result<LayerConfig> {
             None => panic!("no filename for {}", ora_path.display()),
         }
     ));
-    println!("{}", config_path.display());
     let mut config_file = File::open(config_path)?;
     config_file.read_to_string(&mut config_string)?;
-    println!("{}", config_string);
-
-    Ok(LayerConfig::default())
+    Ok(from_str(&config_string).expect("this should be a question mark"))
 }
