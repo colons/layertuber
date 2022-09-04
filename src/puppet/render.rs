@@ -1,11 +1,12 @@
 use crate::puppet::rig::{Rig, RigLayer};
 use crate::tracker::TrackingReport;
+use core::ops::Mul;
 use std::sync::mpsc::Receiver;
 use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
     degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, FrameInput,
-    FrameOutput, Gm, Mat4, Mesh, Quaternion, RenderStates, Texture2D,
+    FrameOutput, Gm, Mat4, Mesh, Quaternion, RenderStates, SquareMatrix, Texture2D,
 };
 
 struct RenderLayer {
@@ -40,15 +41,23 @@ impl RenderLayer {
         render_layers
     }
 
-    fn apply_transformation(&mut self, report: &TrackingReport) -> () {
-        self.model.set_transformation(Mat4::from(Quaternion::new(
+    fn rotation(&mut self, report: &TrackingReport) -> Mat4 {
+        Mat4::from(Quaternion::new(
             // this ordering is weird because scipy deals in quats scalar-last, but three_d's are scalar-first
             report.head_rotation[3],
             // invert these to make the puppet behave like a mirror
             -report.head_rotation[0], // pitch
             -report.head_rotation[1], // yaw
             -report.head_rotation[2], // roll
-        )));
+        ))
+    }
+
+    fn apply_transformation(&mut self, report: &TrackingReport) -> () {
+        let mut transformation = Mat4::identity();
+
+        transformation = transformation.mul(self.rotation(report));
+
+        self.model.set_transformation(transformation);
     }
 }
 
