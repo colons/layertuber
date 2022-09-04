@@ -4,8 +4,8 @@ use std::sync::mpsc::Receiver;
 use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
-    degrees, vec3, Camera, ClearState, ColorMaterial, CpuMesh, FrameInput, FrameOutput, Gm, Mat4,
-    Mesh, Quaternion, Texture2D,
+    degrees, vec3, Blend, Camera, ClearState, ColorMaterial, CpuMesh, FrameInput, FrameOutput, Gm,
+    Mat4, Mesh, Quaternion, RenderStates, Texture2D,
 };
 
 pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
@@ -31,6 +31,11 @@ pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
         Mesh::new(&context, &CpuMesh::square()),
         ColorMaterial {
             texture: Some(Arc::new(Texture2D::new(&context, &rig.layers[1].texture))),
+            is_transparent: true,
+            render_states: RenderStates {
+                blend: Blend::TRANSPARENCY,
+                ..Default::default()
+            },
             ..Default::default()
         },
     );
