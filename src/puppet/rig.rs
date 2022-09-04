@@ -9,11 +9,17 @@ use three_d_asset::io::RawAssets;
 use zip::read::ZipArchive;
 
 #[derive(Debug)]
+pub struct LayerConfig {
+    pub visible: bool,
+}
+
+#[derive(Debug)]
 pub struct RigLayer {
     pub texture: CpuTexture,
     pub x: i32,
     pub y: i32,
     pub name: String,
+    pub config: LayerConfig,
 }
 
 #[derive(Debug)]
@@ -29,6 +35,19 @@ impl Rig {
         let mut layers = Vec::new();
         let mut assets = RawAssets::new();
 
+        let mut config_string = String::new();
+        let config_path = ora_path.with_file_name(format!(
+            "{}.layertuber.yaml",
+            match ora_path.file_name() {
+                Some(f) => f.to_string_lossy(),
+                None => panic!("no filename for {}", ora_path.display()),
+            }
+        ));
+        println!("{}", config_path.display());
+        let mut config_file = File::open(config_path)?;
+        config_file.read_to_string(&mut config_string)?;
+        println!("{}", config_string);
+
         let (width, height, ora_layers) = ora::read(&mut ora)?;
 
         for ora_layer in ora_layers {
@@ -39,6 +58,7 @@ impl Rig {
                 name: ora_layer.name,
                 x: ora_layer.x,
                 y: ora_layer.y,
+                config: LayerConfig { visible: true },
                 texture: from_asset(
                     assets
                         .deserialize(&ora_layer.src)
