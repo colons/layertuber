@@ -16,20 +16,27 @@ struct RenderLayer {
 
 impl RenderLayer {
     fn from_rig_layer(rig: &Rig, rig_layer: &RigLayer, context: &Context) -> RenderLayer {
+        let aspect_ratio = (rig.height as f32) / (rig.width as f32);
+
         let translation = Mat4::from_translation(Vec3 {
-            x: (rig_layer.x as f32) / (rig.width as f32),
-            y: (rig_layer.y as f32) / (rig.height as f32),
+            x: (((rig_layer.x as f32) - (rig.width as f32 / 2.0)
+                + (rig_layer.texture.width as f32 / 2.0))
+                / rig.width as f32)
+                * 2.0,
+            y: (((rig_layer.y as f32) - (rig.height as f32 / 2.0)
+                + (rig_layer.texture.height as f32 / 2.0))
+                / rig.height as f32)
+                * -(2.0 * aspect_ratio),
             z: 0.0,
         });
         let scale = Mat4::from_nonuniform_scale(
             (rig_layer.texture.width as f32) / (rig.width as f32),
-            ((rig_layer.texture.height as f32) / (rig.height as f32))
-                * ((rig_layer.texture.height as f32) / (rig_layer.texture.width as f32)),
+            ((rig_layer.texture.height as f32) / (rig.height as f32)) * aspect_ratio,
             1.0,
         );
 
         RenderLayer {
-            base_transformation: Mat4::identity().mul(translation).mul(scale),
+            base_transformation: translation.mul(scale.mul(Mat4::identity())),
             model: Gm::new(
                 Mesh::new(&context, &CpuMesh::square()),
                 ColorMaterial {
