@@ -8,6 +8,10 @@ use three_d::{
     Mat4, Mesh, Quaternion, RenderStates, Texture2D,
 };
 
+struct RenderLayer {
+    model: Gm<Mesh, ColorMaterial>,
+}
+
 pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
     let window = Window::new(WindowSettings {
         title: "layertuber".to_string(),
@@ -27,35 +31,45 @@ pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
         10.0,
     );
 
-    let mut model = Gm::new(
-        Mesh::new(&context, &CpuMesh::square()),
-        ColorMaterial {
-            texture: Some(Arc::new(Texture2D::new(&context, &rig.layers[1].texture))),
-            is_transparent: true,
-            render_states: RenderStates {
-                blend: Blend::TRANSPARENCY,
-                ..Default::default()
-            },
-            ..Default::default()
-        },
-    );
+    let mut render_layers: Vec<RenderLayer> = Vec::new();
+
+    for rig_layer in &rig.layers {
+        render_layers.push(RenderLayer {
+            model: Gm::new(
+                Mesh::new(&context, &CpuMesh::square()),
+                ColorMaterial {
+                    texture: Some(Arc::new(Texture2D::new(&context, &rig_layer.texture))),
+                    is_transparent: true,
+                    render_states: RenderStates {
+                        blend: Blend::TRANSPARENCY,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+            ),
+        })
+    }
 
     window.render_loop(move |frame_input: FrameInput| {
         let report = rx.recv().unwrap();
+        let target = frame_input.screen();
 
         camera.set_viewport(frame_input.viewport);
 
-        model.set_transformation(Mat4::from(Quaternion::new(
-            report.head_rotation[3],
-            report.head_rotation[0],
-            report.head_rotation[1],
-            report.head_rotation[2],
-        )));
+        target.clear(ClearState::color_and_depth(0.0, 1.0, 0.0, 1.0, 1.0));
 
-        frame_input
-            .screen()
-            .clear(ClearState::color_and_depth(0.0, 1.0, 0.0, 1.0, 1.0))
-            .render(&camera, &[&model], &[]);
+        for render_layer in &mut render_layers {
+            render_layer
+                .model
+                .set_transformation(Mat4::from(Quaternion::new(
+                    report.head_rotation[3],
+                    report.head_rotation[0],
+                    report.head_rotation[1],
+                    report.head_rotation[2],
+                )));
+            target.render(&camera, &[&render_layer.model], &[]);
+            target.clear(ClearState::depth(1.0));
+        }
 
         FrameOutput::default()
     });
