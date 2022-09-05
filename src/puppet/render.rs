@@ -1,4 +1,4 @@
-use crate::puppet::config;
+use crate::puppet::config::{LayerConfig, Rule};
 use crate::puppet::rig::{Rig, RigLayer};
 use crate::tracker::TrackingReport;
 use core::ops::Mul;
@@ -13,7 +13,7 @@ use three_d::{
 struct RenderLayer {
     model: Gm<Mesh, ColorMaterial>,
     base_transformation: Mat4,
-    config: config::LayerConfig,
+    config: LayerConfig,
 }
 
 impl RenderLayer {
@@ -65,6 +65,31 @@ impl RenderLayer {
         render_layers
     }
 
+    fn currently_visible(&self, report: &TrackingReport) -> bool {
+        if !self.config.visible {
+            return false;
+        }
+
+        match self.config.invisible_when {
+            None => (),
+            Some(rule) => {
+                if rule.apply(&report) {
+                    return false;
+                }
+            }
+        }
+
+        match self.config.visible_when {
+            None => (),
+            Some(rule) => {
+                if !rule.apply(&report) {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+
     fn rotation(&mut self, report: &TrackingReport) -> Mat4 {
         Mat4::from(Quaternion::new(
             // this ordering is weird because scipy deals in quats scalar-last, but three_d's are scalar-first
@@ -112,7 +137,7 @@ pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
         target.clear(ClearState::color_and_depth(0.0, 1.0, 0.0, 1.0, 1.0));
 
         for render_layer in &mut render_layers {
-            if !render_layer.config.visible {
+            if !render_layer.currently_visible(&report) {
                 continue;
             }
 

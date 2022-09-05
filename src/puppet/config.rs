@@ -1,3 +1,4 @@
+use crate::tracker::TrackingReport;
 use serde::Deserialize;
 use serde_yaml::from_str;
 use std::collections::HashMap;
@@ -6,20 +7,57 @@ use std::io;
 use std::io::Read;
 use std::path::Path;
 
-fn default_visible() -> bool {
-    true
+trait Source<T> {
+    fn value(&self, report: &TrackingReport) -> T;
+}
+
+#[derive(Debug, Deserialize, Copy, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum FloatSource {
+    Blink,
+}
+
+impl Source<f32> for FloatSource {
+    fn value(&self, report: &TrackingReport) -> f32 {
+        match self {
+            FloatSource::Blink => report.blink,
+        }
+    }
+}
+
+pub trait Rule<T> {
+    fn apply(&self, report: &TrackingReport) -> T;
+}
+
+#[derive(Debug, Deserialize, Copy, Clone)]
+pub struct ThresholdRule {
+    pub option: FloatSource,
+    pub greater_than: f32,
+}
+
+impl Rule<bool> for ThresholdRule {
+    fn apply(&self, report: &TrackingReport) -> bool {
+        return self.option.value(report) > self.greater_than;
+    }
 }
 
 #[derive(Debug, Deserialize, Copy, Clone)]
 pub struct LayerConfig {
     #[serde(default = "default_visible")]
     pub visible: bool,
+
+    pub visible_when: Option<ThresholdRule>,
+    pub invisible_when: Option<ThresholdRule>,
 }
 
 impl Default for LayerConfig {
     fn default() -> LayerConfig {
         from_str("").unwrap()
     }
+}
+
+fn default_visible() -> bool {
+    true
 }
 
 #[derive(Debug, Deserialize)]
