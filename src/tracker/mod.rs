@@ -1,6 +1,6 @@
 use dirs::cache_dir;
 use lazy_static::lazy_static;
-pub use report::{FloatSource, Source, TrackingReport};
+pub use report::{FloatSource, QuatSource, Source, TrackingReport};
 use serde_json;
 use std::fs;
 use std::fs::File;

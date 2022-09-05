@@ -2,6 +2,7 @@
 The types here must reflect the types defined in tracking/report.py
 */
 use serde::Deserialize;
+use three_d::Quaternion;
 
 #[derive(Deserialize, Debug)]
 pub struct TrackingReport {
@@ -69,5 +70,28 @@ impl Source<f32> for FloatSource {
             FloatSource::MouthOpen => report.mouth_open,
             FloatSource::MouthWide => report.mouth_wide,
         }
+    }
+}
+
+#[derive(Debug, Deserialize, Copy, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum QuatSource {
+    HeadRotation,
+}
+
+impl Source<Quaternion<f32>> for QuatSource {
+    fn value(&self, report: &TrackingReport) -> Quaternion<f32> {
+        let value = match self {
+            QuatSource::HeadRotation => report.head_rotation,
+        };
+
+        Quaternion::new(
+            // this ordering is weird because scipy deals in quats scalar-last, but three_d's are scalar-first
+            value[3],
+            // invert these to make the puppet behave like a mirror
+            -value[0], // pitch
+            -value[1], // yaw
+            -value[2], // roll
+        )
     }
 }
