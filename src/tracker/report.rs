@@ -5,18 +5,18 @@ use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub struct TrackingReport {
+    pub blink: f32,
     pub blink_left: f32,
     pub blink_right: f32,
-    pub blink: f32,
+    pub eyebrow_quirk: f32,
     pub eyebrow_quirk_left: f32,
     pub eyebrow_quirk_right: f32,
-    pub eyebrow_quirk: f32,
+    pub eyebrow_steepness: f32,
     pub eyebrow_steepness_left: f32,
     pub eyebrow_steepness_right: f32,
-    pub eyebrow_steepness: f32,
+    pub eyebrow_updown: f32,
     pub eyebrow_updown_left: f32,
     pub eyebrow_updown_right: f32,
-    pub eyebrow_updown: f32,
     pub mouth_open: f32,
     pub mouth_wide: f32,
 

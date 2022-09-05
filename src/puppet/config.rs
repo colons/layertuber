@@ -15,12 +15,38 @@ trait Source<T> {
 #[serde(rename_all = "snake_case")]
 pub enum FloatSource {
     Blink,
+    BlinkLeft,
+    BlinkRight,
+    EyebrowQuirk,
+    EyebrowQuirkLeft,
+    EyebrowQuirkRight,
+    EyebrowSteepness,
+    EyebrowSteepnessLeft,
+    EyebrowSteepnessRight,
+    EyebrowUpdown,
+    EyebrowUpdownLeft,
+    EyebrowUpdownRight,
+    MouthOpen,
+    MouthWide,
 }
 
 impl Source<f32> for FloatSource {
     fn value(&self, report: &TrackingReport) -> f32 {
         match self {
             FloatSource::Blink => report.blink,
+            FloatSource::BlinkLeft => report.blink_left,
+            FloatSource::BlinkRight => report.blink_right,
+            FloatSource::EyebrowQuirk => report.eyebrow_quirk,
+            FloatSource::EyebrowQuirkLeft => report.eyebrow_quirk_left,
+            FloatSource::EyebrowQuirkRight => report.eyebrow_quirk_right,
+            FloatSource::EyebrowSteepness => report.eyebrow_steepness,
+            FloatSource::EyebrowSteepnessLeft => report.eyebrow_steepness_left,
+            FloatSource::EyebrowSteepnessRight => report.eyebrow_steepness_right,
+            FloatSource::EyebrowUpdown => report.eyebrow_updown,
+            FloatSource::EyebrowUpdownLeft => report.eyebrow_updown_left,
+            FloatSource::EyebrowUpdownRight => report.eyebrow_updown_right,
+            FloatSource::MouthOpen => report.mouth_open,
+            FloatSource::MouthWide => report.mouth_wide,
         }
     }
 }
