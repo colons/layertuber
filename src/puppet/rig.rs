@@ -32,7 +32,6 @@ impl Rig {
         let mut assets = RawAssets::new();
 
         let mut config = config::load(ora_path)?;
-        dbg!(&config);
         let (width, height, ora_layers) = ora::read(&mut ora)?;
 
         for ora_layer in ora_layers {
