@@ -1,18 +1,19 @@
-use std::sync::mpsc::sync_channel;
+use std::sync::mpsc::{channel, sync_channel};
 use std::thread;
 
 mod puppet;
 mod tracker;
 
 fn main() {
-    let (tx, rx) = sync_channel(0);
+    let (report_tx, report_rx) = sync_channel(0);
+    let (control_tx, control_rx) = channel();
 
     thread::spawn(move || {
-        let tracker = tracker::run_tracker().expect("could not start tracker");
+        let tracker = tracker::run_tracker(control_rx).expect("could not start tracker");
         for report in tracker {
-            tx.send(report).unwrap()
+            report_tx.send(report).unwrap()
         }
     });
 
-    puppet::run_puppet(rx);
+    puppet::run_puppet(report_rx, control_tx);
 }

@@ -1,8 +1,8 @@
 use crate::puppet::config::{LayerConfig, Rule};
 use crate::puppet::rig::{Rig, RigLayer};
-use crate::tracker::{QuatSource, Source, TrackingReport};
+use crate::tracker::{ControlMessage, QuatSource, Source, TrackingReport};
 use core::ops::Mul;
-use std::sync::mpsc::Receiver;
+use std::sync::mpsc::{Receiver, Sender};
 use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
@@ -101,7 +101,7 @@ impl RenderLayer {
     }
 }
 
-fn handle_input(frame_input: &FrameInput) {
+fn handle_input(frame_input: &FrameInput, control_tx: &Sender<ControlMessage>) {
     for event in &frame_input.events {
         match event {
             Event::KeyPress {
@@ -110,7 +110,7 @@ fn handle_input(frame_input: &FrameInput) {
                 handled: _,
             } => match kind {
                 Key::C => {
-                    eprintln!("calibrating");
+                    control_tx.send(ControlMessage::Calibrate).unwrap();
                 }
                 _ => (),
             },
@@ -119,7 +119,7 @@ fn handle_input(frame_input: &FrameInput) {
     }
 }
 
-pub fn render(tracking_rx: Receiver<TrackingReport>, rig: Rig) {
+pub fn render(tracking_rx: Receiver<TrackingReport>, control_tx: Sender<ControlMessage>, rig: Rig) {
     let window = Window::new(WindowSettings {
         title: "layertuber".to_string(),
         ..Default::default()
@@ -141,7 +141,7 @@ pub fn render(tracking_rx: Receiver<TrackingReport>, rig: Rig) {
     let mut render_layers: Vec<RenderLayer> = RenderLayer::from_rig(&rig, &context);
 
     window.render_loop(move |frame_input: FrameInput| {
-        handle_input(&frame_input);
+        handle_input(&frame_input, &control_tx);
 
         let report = tracking_rx.recv().unwrap();
         let target = frame_input.screen();

@@ -8,6 +8,7 @@ use std::io::{Read, Write};
 use std::mem::drop;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
+use std::sync::mpsc::Receiver;
 use subprocess::{ExitStatus, Popen, PopenConfig, PopenError, Redirection};
 
 const NEWLINE: u8 = "\n".as_bytes()[0];
@@ -18,6 +19,10 @@ lazy_static! {
 
 mod bin;
 mod report;
+
+pub enum ControlMessage {
+    Calibrate,
+}
 
 #[derive(Debug)]
 pub enum RunTrackerError {
@@ -39,14 +44,20 @@ impl From<PopenError> for RunTrackerError {
 
 pub struct FaceTracker {
     cleanup: Box<dyn FnMut() -> ()>,
+    control_rx: Receiver<ControlMessage>,
     p: Popen,
 }
 
 impl FaceTracker {
-    fn new(p: Popen, cleanup: Box<dyn FnMut() -> ()>) -> FaceTracker {
+    fn new(
+        p: Popen,
+        control_rx: Receiver<ControlMessage>,
+        cleanup: Box<dyn FnMut() -> ()>,
+    ) -> FaceTracker {
         FaceTracker {
-            cleanup: cleanup,
-            p: p,
+            cleanup,
+            control_rx,
+            p,
         }
     }
 
@@ -63,6 +74,21 @@ impl FaceTracker {
             }
             None => (),
         };
+    }
+
+    fn handle_input(&mut self) {
+        loop {
+            match self.control_rx.try_recv() {
+                Ok(cm) => {
+                    match cm {
+                        ControlMessage::Calibrate => {
+                            eprintln!("calibrating")
+                        },
+                    }
+                },
+                Err(_) => break,
+            }
+        }
     }
 
     fn read_line(&mut self) -> String {
@@ -99,6 +125,8 @@ impl Iterator for FaceTracker {
 
     fn next(&mut self) -> Option<TrackingReport> {
         self.poll();
+        self.handle_input();
+
         let line = self.read_line();
         let report: TrackingReport = match serde_json::from_str(&line) {
             Ok(r) => r,
@@ -108,7 +136,9 @@ impl Iterator for FaceTracker {
     }
 }
 
-pub fn run_tracker<'a>() -> Result<FaceTracker, RunTrackerError> {
+pub fn run_tracker<'a>(
+    control_rx: Receiver<ControlMessage>,
+) -> Result<FaceTracker, RunTrackerError> {
     let mut tracker_bin = File::create(TRACKER_BIN_PATH.as_path())?;
 
     tracker_bin.write(bin::TRACKER_BIN)?;
@@ -132,6 +162,7 @@ pub fn run_tracker<'a>() -> Result<FaceTracker, RunTrackerError> {
 
     let tracker = FaceTracker::new(
         p,
+        control_rx,
         Box::new(|| {
             match fs::remove_file(TRACKER_BIN_PATH.as_path()) {
                 Ok(_) => eprintln!("deleted tracker"),
