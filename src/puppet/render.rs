@@ -6,8 +6,8 @@ use std::sync::mpsc::Receiver;
 use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
-    degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, FrameInput,
-    FrameOutput, Gm, Mat4, Mesh, RenderStates, SquareMatrix, Texture2D, Vec3,
+    degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, Event, FrameInput,
+    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, SquareMatrix, Texture2D, Vec3,
 };
 
 struct RenderLayer {
@@ -101,7 +101,25 @@ impl RenderLayer {
     }
 }
 
-pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
+fn handle_input(frame_input: &FrameInput) {
+    for event in &frame_input.events {
+        match event {
+            Event::KeyPress {
+                kind,
+                modifiers: _,
+                handled: _,
+            } => match kind {
+                Key::C => {
+                    eprintln!("calibrating");
+                }
+                _ => (),
+            },
+            _ => (),
+        }
+    }
+}
+
+pub fn render(tracking_rx: Receiver<TrackingReport>, rig: Rig) {
     let window = Window::new(WindowSettings {
         title: "layertuber".to_string(),
         ..Default::default()
@@ -123,7 +141,9 @@ pub fn render(rx: Receiver<TrackingReport>, rig: Rig) {
     let mut render_layers: Vec<RenderLayer> = RenderLayer::from_rig(&rig, &context);
 
     window.render_loop(move |frame_input: FrameInput| {
-        let report = rx.recv().unwrap();
+        handle_input(&frame_input);
+
+        let report = tracking_rx.recv().unwrap();
         let target = frame_input.screen();
 
         camera.set_viewport(frame_input.viewport);
