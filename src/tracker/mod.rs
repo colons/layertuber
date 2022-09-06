@@ -82,7 +82,7 @@ impl FaceTracker {
                 Ok(cm) => {
                     match cm {
                         ControlMessage::Calibrate => {
-                            eprintln!("calibrating")
+                            self.p.stdin.as_ref().unwrap().write("calibrate".as_bytes()).unwrap();
                         },
                     }
                 },
@@ -126,8 +126,8 @@ impl Iterator for FaceTracker {
     fn next(&mut self) -> Option<TrackingReport> {
         self.poll();
         self.handle_input();
-
         let line = self.read_line();
+
         let report: TrackingReport = match serde_json::from_str(&line) {
             Ok(r) => r,
             Err(e) => panic!("got bad data from tracker: {} ({})", line, e),

@@ -30,8 +30,13 @@ def main() -> None:
     args = _parse_args()
 
     reporter = Reporter()
-    for report in FaceTracker(capture=args.camera, show_features=args.show_features).begin_loop():
+    tracker = FaceTracker(capture=args.camera, show_features=args.show_features)
+    for report in tracker.begin_loop():
         reporter.report(report)
+
+        message = input()
+        if message == 'calibrate':
+            tracker.calibrate()
 
 
 if __name__ == '__main__':
