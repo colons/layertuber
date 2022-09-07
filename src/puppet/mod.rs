@@ -1,4 +1,4 @@
-use crate::tracker::{TrackingReport, ControlMessage};
+use crate::tracker::{ControlMessage, TrackingReport};
 use std::path::Path;
 use std::sync::mpsc::{Receiver, Sender};
 

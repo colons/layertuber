@@ -79,11 +79,14 @@ impl FaceTracker {
     fn handle_input(&mut self) {
         loop {
             match self.control_rx.try_recv() {
-                Ok(cm) => {
-                    match cm {
-                        ControlMessage::Calibrate => {
-                            self.p.stdin.as_ref().unwrap().write("calibrate".as_bytes()).unwrap();
-                        },
+                Ok(cm) => match cm {
+                    ControlMessage::Calibrate => {
+                        self.p
+                            .stdin
+                            .as_ref()
+                            .unwrap()
+                            .write("calibrate".as_bytes())
+                            .unwrap();
                     }
                 },
                 Err(_) => break,
