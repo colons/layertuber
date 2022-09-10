@@ -167,7 +167,7 @@ pub fn run_tracker(control_rx: Receiver<ControlMessage>) -> Result<FaceTracker, 
     args.push(TRACKER_BIN_PATH.as_path().as_os_str());
 
     #[cfg(debug_assertions)]
-    args.extend(["python", "src/py/layertuber/__init__.py"].map(|a| OsStr::new(a)));
+    args.extend(["python", "src/py/layertuber/__init__.py"].map(OsStr::new));
 
     let p = Popen::create(
         &args,
