@@ -15,3 +15,6 @@ runs:
 
     - run: pip install '.[dev]'
       shell: bash
+
+    - run: rustup component add clippy
+      shell: bash
