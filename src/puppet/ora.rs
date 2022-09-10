@@ -10,6 +10,16 @@ pub struct Layer {
     pub src: String,
     pub x: i32,
     pub y: i32,
+
+    #[serde(skip)]
+    pub parent_names: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Stack {
+    #[serde(rename = "$value")]
+    entries: Vec<StackEntry>,
+    name: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -17,12 +27,6 @@ pub struct Layer {
 enum StackEntry {
     Layer(Layer),
     Stack(Stack),
-}
-
-#[derive(Debug, Deserialize)]
-struct Stack {
-    #[serde(rename = "$value")]
-    entries: Vec<StackEntry>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -37,13 +41,19 @@ struct Image {
     height: u32,
 }
 
-fn layers_from_stack(entries: Vec<StackEntry>) -> Vec<Layer> {
+fn layers_from_stack(parent_names: Vec<String>, entries: Vec<StackEntry>) -> Vec<Layer> {
     let mut layers: Vec<Layer> = Vec::new();
 
     for entry in entries {
         match entry {
-            StackEntry::Layer(l) => layers.push(l),
-            StackEntry::Stack(s) => layers.extend_from_slice(&layers_from_stack(s.entries)),
+            StackEntry::Layer(mut l) => {
+                l.parent_names = parent_names.clone();
+                layers.push(l)
+            }
+            StackEntry::Stack(s) => layers.extend_from_slice(&layers_from_stack(
+                [parent_names.as_slice(), &[String::from(s.name)]].concat(),
+                s.entries,
+            )),
         }
     }
 
@@ -67,8 +77,8 @@ pub fn read(ora: &mut ZipArchive<impl Read + Seek>) -> io::Result<(u32, u32, Vec
 
     let mut layers = Vec::new();
 
-    for path in layers_from_stack(image.entries) {
-        layers.push(path);
+    for layer in layers_from_stack(vec![], image.entries) {
+        layers.push(layer);
     }
 
     layers.reverse();
