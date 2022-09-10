@@ -19,7 +19,7 @@ pub struct ThresholdRule {
 
 impl Rule<bool> for ThresholdRule {
     fn apply(&self, report: &TrackingReport) -> bool {
-        return self.option.value(report) > self.greater_than;
+        self.option.value(report) > self.greater_than
     }
 }
 

@@ -63,9 +63,9 @@ impl Rig {
         // XXX print out the remaining config keys, since they're probably misconfigs
 
         Ok(Rig {
-            width: width,
-            height: height,
-            layers: layers,
+            width,
+            height,
+            layers,
         })
     }
 }

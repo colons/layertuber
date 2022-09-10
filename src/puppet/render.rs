@@ -41,9 +41,9 @@ impl RenderLayer {
             base_transformation: translation.mul(scale.mul(Mat4::identity())),
             config: rig_layer.config,
             model: Gm::new(
-                Mesh::new(&context, &CpuMesh::square()),
+                Mesh::new(context, &CpuMesh::square()),
                 ColorMaterial {
-                    texture: Some(Arc::new(Texture2D::new(&context, &rig_layer.texture))),
+                    texture: Some(Arc::new(Texture2D::new(context, &rig_layer.texture))),
                     is_transparent: true,
                     render_states: RenderStates {
                         blend: Blend::TRANSPARENCY,
@@ -73,7 +73,7 @@ impl RenderLayer {
         match self.config.invisible_when {
             None => (),
             Some(rule) => {
-                if rule.apply(&report) {
+                if rule.apply(report) {
                     return false;
                 }
             }
@@ -82,7 +82,7 @@ impl RenderLayer {
         match self.config.visible_when {
             None => (),
             Some(rule) => {
-                if !rule.apply(&report) {
+                if !rule.apply(report) {
                     return false;
                 }
             }
@@ -95,7 +95,7 @@ impl RenderLayer {
         Mat4::from(QuatSource::HeadRotation.value(report))
     }
 
-    fn apply_transformation(&mut self, report: &TrackingReport) -> () {
+    fn apply_transformation(&mut self, report: &TrackingReport) {
         let transformation = self.rotation(report).mul(self.base_transformation);
         self.model.set_transformation(transformation);
     }
@@ -105,15 +105,20 @@ fn handle_input(frame_input: &FrameInput, control_tx: &Sender<ControlMessage>) {
     for event in &frame_input.events {
         match event {
             Event::KeyPress {
-                kind,
+                kind: Key::B,
                 modifiers: _,
                 handled: _,
-            } => match kind {
-                Key::C => {
-                    control_tx.send(ControlMessage::Calibrate).unwrap();
-                }
-                _ => (),
-            },
+            } => control_tx.send(ControlMessage::Calibrate).unwrap(),
+            Event::KeyPress {
+                kind: Key::C,
+                modifiers: _,
+                handled: _,
+            } => eprintln!("this should reset the camera"),
+            Event::KeyPress {
+                kind: Key::Space,
+                modifiers: _,
+                handled: _,
+            } => eprintln!("this toggle gui elements, once they exist"),
             _ => (),
         }
     }

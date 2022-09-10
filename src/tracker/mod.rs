@@ -1,7 +1,6 @@
 use dirs::cache_dir;
 use lazy_static::lazy_static;
 pub use report::{FloatSource, QuatSource, Source, TrackingReport};
-use serde_json;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
@@ -32,18 +31,18 @@ pub enum RunTrackerError {
 
 impl From<std::io::Error> for RunTrackerError {
     fn from(err: std::io::Error) -> RunTrackerError {
-        return RunTrackerError::Io(err);
+        RunTrackerError::Io(err)
     }
 }
 
 impl From<PopenError> for RunTrackerError {
     fn from(err: PopenError) -> RunTrackerError {
-        return RunTrackerError::Popen(err);
+        RunTrackerError::Popen(err)
     }
 }
 
 pub struct FaceTracker {
-    cleanup: Box<dyn FnMut() -> ()>,
+    cleanup: Box<dyn FnMut()>,
     control_rx: Receiver<ControlMessage>,
     p: Popen,
 }
@@ -52,7 +51,7 @@ impl FaceTracker {
     fn new(
         p: Popen,
         control_rx: Receiver<ControlMessage>,
-        cleanup: Box<dyn FnMut() -> ()>,
+        cleanup: Box<dyn FnMut()>,
     ) -> FaceTracker {
         FaceTracker {
             cleanup,
@@ -77,19 +76,16 @@ impl FaceTracker {
     }
 
     fn handle_input(&mut self) {
-        loop {
-            match self.control_rx.try_recv() {
-                Ok(cm) => match cm {
-                    ControlMessage::Calibrate => {
-                        self.p
-                            .stdin
-                            .as_ref()
-                            .unwrap()
-                            .write("calibrate".as_bytes())
-                            .unwrap();
-                    }
-                },
-                Err(_) => break,
+        while let Ok(cm) = self.control_rx.try_recv() {
+            match cm {
+                ControlMessage::Calibrate => {
+                    self.p
+                        .stdin
+                        .as_ref()
+                        .unwrap()
+                        .write_all("calibrate".as_bytes())
+                        .unwrap();
+                }
             }
         }
     }
@@ -117,7 +113,12 @@ impl FaceTracker {
             }
         }
 
-        self.p.stdin.as_ref().unwrap().write(&[NEWLINE]).unwrap();
+        self.p
+            .stdin
+            .as_ref()
+            .unwrap()
+            .write_all(&[NEWLINE])
+            .unwrap();
 
         line
     }
@@ -139,12 +140,10 @@ impl Iterator for FaceTracker {
     }
 }
 
-pub fn run_tracker<'a>(
-    control_rx: Receiver<ControlMessage>,
-) -> Result<FaceTracker, RunTrackerError> {
+pub fn run_tracker(control_rx: Receiver<ControlMessage>) -> Result<FaceTracker, RunTrackerError> {
     let mut tracker_bin = File::create(TRACKER_BIN_PATH.as_path())?;
 
-    tracker_bin.write(bin::TRACKER_BIN)?;
+    tracker_bin.write_all(bin::TRACKER_BIN)?;
     tracker_bin.flush()?;
 
     let metadata = tracker_bin.metadata()?;

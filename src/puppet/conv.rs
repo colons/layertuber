@@ -22,7 +22,7 @@ fn half(asset: &three_d_asset::f16) -> three_d::f16 {
 
 fn rhalf(asset: Vec<three_d_asset::f16>) -> Vec<three_d::f16> {
     let mut output = Vec::new();
-    output.extend(asset.iter().map(|d| half(d)));
+    output.extend(asset.iter().map(half));
     output
 }
 
@@ -74,10 +74,7 @@ pub fn from_asset(asset: three_d_asset::Texture2D) -> three_d::CpuTexture {
         width: asset.width,
         mag_filter: interpolation(asset.mag_filter),
         min_filter: interpolation(asset.min_filter),
-        mip_map_filter: match asset.mip_map_filter {
-            None => None,
-            Some(i) => Some(interpolation(i)),
-        },
+        mip_map_filter: asset.mip_map_filter.map(interpolation),
         wrap_s: wrapping(asset.wrap_s),
         wrap_t: wrapping(asset.wrap_t),
     }
