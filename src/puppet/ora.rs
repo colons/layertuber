@@ -51,7 +51,7 @@ fn layers_from_stack(parent_names: Vec<String>, entries: Vec<StackEntry>) -> Vec
                 layers.push(l)
             }
             StackEntry::Stack(s) => layers.extend_from_slice(&layers_from_stack(
-                [parent_names.as_slice(), &[String::from(s.name)]].concat(),
+                [parent_names.as_slice(), &[s.name]].concat(),
                 s.entries,
             )),
         }
