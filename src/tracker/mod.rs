@@ -1,6 +1,7 @@
 use dirs::cache_dir;
 use lazy_static::lazy_static;
 pub use report::{FloatSource, QuatSource, Source, TrackingReport};
+use std::ffi::OsStr;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
@@ -160,13 +161,13 @@ pub fn run_tracker(control_rx: Receiver<ControlMessage>) -> Result<FaceTracker, 
 
     drop(tracker_bin);
 
-    let mut args: Vec<String> = Vec::new();
+    let mut args: Vec<&OsStr> = Vec::new();
 
     #[cfg(not(debug_assertions))]
-    args.push(TRACKER_BIN.as_path());
+    args.push(TRACKER_BIN_PATH.as_path().as_os_str());
 
     #[cfg(debug_assertions)]
-    args.extend(["python", "src/py/layertuber/__init__.py"].map(|a| String::from(a)));
+    args.extend(["python", "src/py/layertuber/__init__.py"].map(|a| OsStr::new(a)));
 
     let p = Popen::create(
         &args,
