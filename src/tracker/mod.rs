@@ -148,7 +148,9 @@ impl Iterator for FaceTracker {
 pub fn run_tracker(control_rx: Receiver<ControlMessage>) -> Result<FaceTracker, RunTrackerError> {
     let mut tracker_bin = File::create(TRACKER_BIN_PATH.as_path())?;
 
+    #[cfg(not(debug_assertions))]
     tracker_bin.write_all(bin::TRACKER_BIN)?;
+
     tracker_bin.flush()?;
 
     let metadata = tracker_bin.metadata()?;
@@ -158,8 +160,16 @@ pub fn run_tracker(control_rx: Receiver<ControlMessage>) -> Result<FaceTracker, 
 
     drop(tracker_bin);
 
+    let mut args: Vec<String> = Vec::new();
+
+    #[cfg(not(debug_assertions))]
+    args.push(TRACKER_BIN.as_path());
+
+    #[cfg(debug_assertions)]
+    args.extend(["python", "src/py/layertuber/__init__.py"].map(|a| String::from(a)));
+
     let p = Popen::create(
-        &[TRACKER_BIN_PATH.as_path()],
+        &args,
         PopenConfig {
             stdin: Redirection::Pipe,
             stdout: Redirection::Pipe,

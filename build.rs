@@ -2,8 +2,13 @@ use std::env;
 use std::path::Path;
 use subprocess::{ExitStatus, Popen, PopenConfig};
 
-fn main() {
-    println!("cargo:rerun-if-changed=src/py/layertuber");
+fn build_pyinstaller() {
+    if let Ok(profile) = env::var("PROFILE") {
+        if profile != "release" {
+            return;
+        }
+    }
+
     env::set_current_dir(Path::new("src/py")).expect("could not enter python build directory");
 
     let mut p = Popen::create(
@@ -32,4 +37,9 @@ fn main() {
             ExitStatus::Undetermined => panic!("pyinstall failed for an unknown reason"),
         }
     }
+}
+
+fn main() {
+    println!("cargo:rerun-if-changed=src/py/layertuber");
+    build_pyinstaller();
 }
