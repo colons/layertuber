@@ -83,7 +83,7 @@ impl FaceTracker {
                         .stdin
                         .as_ref()
                         .unwrap()
-                        .write_all("calibrate".as_bytes())
+                        .write_all("calibrate\n".as_bytes())
                         .unwrap();
                 }
             }
@@ -128,15 +128,20 @@ impl Iterator for FaceTracker {
     type Item = TrackingReport;
 
     fn next(&mut self) -> Option<TrackingReport> {
-        self.poll();
-        self.handle_input();
-        let line = self.read_line();
+        loop {
+            self.poll();
+            self.handle_input();
 
-        let report: TrackingReport = match serde_json::from_str(&line) {
-            Ok(r) => r,
-            Err(e) => panic!("got bad data from tracker: {} ({})", line, e),
-        };
-        Some(report)
+            let line = self.read_line();
+
+            if !line.is_empty() {
+                let report: TrackingReport = match serde_json::from_str(&line) {
+                    Ok(r) => r,
+                    Err(e) => panic!("got bad data from tracker: {} ({})", line, e),
+                };
+                return Some(report);
+            }
+        }
     }
 }
 

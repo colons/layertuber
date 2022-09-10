@@ -28,4 +28,5 @@ class Reporter:
             }
 
             stdout.buffer.write(orjson.dumps(flattened_report, default=default, option=orjson.OPT_SERIALIZE_NUMPY))
-            stdout.buffer.write(b'\n')
+
+        stdout.buffer.write(b'\n')
