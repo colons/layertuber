@@ -1,54 +1,54 @@
 layers:
   blink l:
     follow_y:
-      option: blink_left
+      source: blink_left
       scale: -0.5
 
   blink:
     follow_y:
-      option: blink
+      source: blink
       scale: -0.5
 
   blink r:
     follow_y:
-      option: blink_right
+      source: blink_right
       scale: -0.5
 
   eyebrow l:
     follow_y:
-      option: eyebrow_updown_left
+      source: eyebrow_updown_left
       scale: -0.25
 
   eyebrow:
     follow_y:
-      option: eyebrow_updown
+      source: eyebrow_updown
       scale: -0.25
 
   eyebrow r:
     follow_y:
-      option: eyebrow_updown_right
+      source: eyebrow_updown_right
       scale: -0.25
 
   mouth open:
     follow_y:
-      option: mouth_open
+      source: mouth_open
       scale: -0.25
 
   mouth wide:
     follow_y:
-      option: mouth_wide
+      source: mouth_wide
       scale: -0.25
 
   head rot:
     rotate_with:
-      option: head_rotation
+      source: head_rotation
 
   head pos:
     follow_facing_point:
-      option: head_rotation
+      source: head_rotation
       scale: 0.1
 
   face pos:
     follow:
-      option: face_position
+      source: face_position
       scale: 1
