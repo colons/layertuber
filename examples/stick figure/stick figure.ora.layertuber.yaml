@@ -15,6 +15,15 @@ layers:
       source: head_rotation
       scale: 0.1
 
+  open mouth:
+    visible_when:
+      source: mouth_open
+      greater_than: 0.5
+  closed mouth:
+    invisible_when:
+      source: mouth_open
+      greater_than: 0.5
+
   eye l closed:
     invisible_when:
       source: blink
