@@ -7,7 +7,7 @@
   - [ ] per-dimension sensitivity scalinng (lock y-axis for shadows, lock z axis if you just prefer to)
 - [ ] convert 3d rotation to lateral movement for custom rotation behaviour
 - don't hard-code:
-  - [ ] the path of the rig
+  - [x] the path of the rig
   - [ ] background colour
   - openseeface options, particularly:
     - [ ] camera index

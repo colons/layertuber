@@ -9,7 +9,11 @@ mod ora;
 mod render;
 mod rig;
 
-pub fn run_puppet(tracker_rx: Receiver<TrackingReport>, control_tx: Sender<ControlMessage>) {
-    let rig = rig::Rig::open(Path::new("examples/stick figure/stick figure.ora")).unwrap();
+pub fn run_puppet(
+    path: &Path,
+    tracker_rx: Receiver<TrackingReport>,
+    control_tx: Sender<ControlMessage>,
+) {
+    let rig = rig::Rig::open(path).unwrap();
     render::render(tracker_rx, control_tx, rig);
 }

@@ -7,6 +7,7 @@ edition = "2021"
 subprocess = "0.2.9"
 
 [dependencies]
+argparse = "0.2.2"
 dirs = "4.0"
 lazy_static = "1.4"
 png = "0.17.5"
