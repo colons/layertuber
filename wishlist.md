@@ -12,7 +12,7 @@
   - openseeface options, particularly:
     - [ ] camera index
     - [ ] tracking feedback
-- [ ] z-offset for individual layers
+- [x] z-offset for individual layers
 - [ ] layers toggleable at runtime (by pressing number keys?) for things like accessories
 - OpenRaster features:
   - [x] groups
