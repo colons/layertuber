@@ -5,7 +5,9 @@ layers:
   head:
     follow:
       source: face_position
-      scale: 1
+      scale:
+        x: 1
+        y: 1
     rotate_3d:
       source: head_rotation
       scale: 1
@@ -42,7 +44,9 @@ layers:
       greater_than: 0.8
     follow:
       source: gaze
-      scale: 0.2
+      scale:
+        x: 0.2
+        y: 0.2
 
   eye r closed:
     invisible_when:
@@ -58,4 +62,6 @@ layers:
       greater_than: 0.8
     follow:
       source: gaze
-      scale: 0.2
+      scale:
+        x: 0.2
+        y: 0.2

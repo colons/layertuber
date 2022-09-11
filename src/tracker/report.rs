@@ -2,7 +2,8 @@
 The types here must reflect the types defined in tracking/report.py
 */
 use serde::Deserialize;
-use three_d::{Quaternion, Vector3};
+use std::ops::Mul;
+use three_d::{Quaternion, Vector2, Vector3};
 
 #[derive(Deserialize, Debug)]
 pub struct TrackingReport {
@@ -95,5 +96,29 @@ impl Source<Quaternion<f32>> for QuatSource {
 
             s: value[3],
         }
+    }
+}
+
+#[derive(Debug, Deserialize, Copy, Clone)]
+#[serde(rename_all = "snake_case")]
+pub enum Vec2Source {
+    FacePosition,
+    LeftGaze,
+    RightGaze,
+    Gaze,
+}
+
+impl Source<Vector2<f32>> for Vec2Source {
+    fn value(&self, report: &TrackingReport) -> Vector2<f32> {
+        let v: Vector2<f32> = (match self {
+            Vec2Source::FacePosition => report.face_position,
+            Vec2Source::LeftGaze => report.left_gaze,
+            Vec2Source::RightGaze => report.right_gaze,
+            Vec2Source::Gaze => report.gaze,
+        })
+        .into();
+
+        // invert to behave like a mirror
+        v.mul(-1.0)
     }
 }

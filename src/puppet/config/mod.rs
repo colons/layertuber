@@ -1,5 +1,5 @@
 pub use self::rules::Rule;
-use self::rules::{FollowQuatRule, ThresholdRule};
+use self::rules::{FollowQuatRule, FollowVec2Rule, ThreeDimensions, ThresholdRule};
 use crate::tracker::TrackingReport;
 use core::ops::Mul;
 use serde::Deserialize;
@@ -8,26 +8,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
 use std::{io, io::Read};
-use three_d::{Mat4, SquareMatrix, Vec3};
+use three_d::{Mat4, SquareMatrix};
 
 mod rules;
-
-#[derive(Debug, Deserialize, Copy, Clone)]
-pub struct Translate3D {
-    x: Option<f32>,
-    y: Option<f32>,
-    z: Option<f32>,
-}
-
-impl From<Translate3D> for Vec3 {
-    fn from(s: Translate3D) -> Vec3 {
-        Vec3 {
-            x: s.x.unwrap_or(0.0),
-            y: s.y.unwrap_or(0.0),
-            z: s.z.unwrap_or(0.0),
-        }
-    }
-}
 
 #[derive(Debug, Deserialize, Copy, Clone)]
 pub struct LayerConfig {
@@ -44,16 +27,24 @@ pub struct LayerConfig {
     pub rotate_3d: Option<FollowQuatRule>,
 
     /// move absolutely in a direction
-    pub offset: Option<Translate3D>,
+    pub offset: Option<ThreeDimensions>,
+
+    /// move absolutely in a direction
+    pub follow: Option<FollowVec2Rule>,
 }
 
 impl LayerConfig {
     /// the transformation that this layer should have applied
     pub fn transform(&self, report: &TrackingReport) -> Mat4 {
-        let mut transformation = Mat4::identity();
+        let mut transformation = match self.follow {
+            Some(follow) => Mat4::from_translation(follow.apply(report)),
+            None => Mat4::identity(),
+        };
+
         if let Some(rotate_3d) = self.rotate_3d {
             transformation = rotate_3d.apply(report).mul(transformation);
         }
+
         transformation
     }
 }
