@@ -1,5 +1,6 @@
-use crate::puppet::config::{LayerConfig, Rule};
-use crate::puppet::rig::{Rig, RigLayer};
+use super::camera::ScaledOrbitControl;
+use super::config::{LayerConfig, Rule};
+use super::rig::{Rig, RigLayer};
 use crate::tracker::{ControlMessage, TrackingReport};
 use core::ops::Mul;
 use std::sync::mpsc::{Receiver, Sender};
@@ -7,7 +8,7 @@ use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
     degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, Event, FrameInput,
-    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, SquareMatrix, Texture2D, Vec3, OrbitControl,
+    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, SquareMatrix, Texture2D, Vec3,
 };
 
 struct RenderLayer {
@@ -133,14 +134,14 @@ pub fn render(tracking_rx: Receiver<TrackingReport>, control_tx: Sender<ControlM
         10.0,
     );
 
-    let mut orbit_control = OrbitControl::new(*camera.target(), 1.0, 3.0);
+    let mut orbit_control = ScaledOrbitControl::new(*camera.target(), 1.0, 3.0, 0.02);
 
     let mut render_layers: Vec<RenderLayer> = RenderLayer::from_rig(&rig, &context);
 
-    window.render_loop(move |mut frame_input: FrameInput| {
+    window.render_loop(move |frame_input: FrameInput| {
         camera.set_viewport(frame_input.viewport);
 
-        orbit_control.handle_events(&mut camera, &mut frame_input.events);
+        orbit_control.handle_events(&mut camera, &frame_input.events);
         handle_input(&frame_input, &control_tx);
 
         let report = tracking_rx.recv().unwrap();

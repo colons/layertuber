@@ -2,6 +2,7 @@ use crate::tracker::{ControlMessage, TrackingReport};
 use std::path::Path;
 use std::sync::mpsc::{Receiver, Sender};
 
+mod camera;
 mod config;
 mod conv;
 mod ora;
