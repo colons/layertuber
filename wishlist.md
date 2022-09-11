@@ -3,8 +3,8 @@
 - [x] visibility thresholds
 - [x] rotation tracking
   - [ ] per-dimension sensitivity scaling
-- [ ] position tracking
-  - [ ] per-dimension sensitivity scalinng (lock y-axis for shadows, lock z axis if you just prefer to)
+- [x] position tracking
+  - [x] per-dimension sensitivity scalinng (lock y-axis for shadows, lock z axis if you just prefer to)
 - [ ] convert 3d rotation to lateral movement for custom rotation behaviour
 - don't hard-code:
   - [x] the path of the rig
