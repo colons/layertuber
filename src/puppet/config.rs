@@ -1,4 +1,4 @@
-use crate::tracker::{FloatSource, Source, TrackingReport};
+use crate::tracker::{FloatSource, QuatSource, Source, TrackingReport};
 use serde::Deserialize;
 use serde_yaml::from_str;
 use std::collections::HashMap;
@@ -6,6 +6,7 @@ use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::path::Path;
+use three_d::Mat4;
 
 pub trait Rule<T> {
     fn apply(&self, report: &TrackingReport) -> T;
@@ -30,6 +31,13 @@ pub struct LayerConfig {
 
     pub visible_when: Option<ThresholdRule>,
     pub invisible_when: Option<ThresholdRule>,
+}
+
+impl LayerConfig {
+    /// the transformation that this layer should have applied
+    pub fn transform(&self, report: &TrackingReport) -> Mat4 {
+        Mat4::from(QuatSource::HeadRotation.value(report))
+    }
 }
 
 impl Default for LayerConfig {

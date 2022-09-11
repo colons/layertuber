@@ -1,6 +1,6 @@
 use crate::puppet::config::{LayerConfig, Rule};
 use crate::puppet::rig::{Rig, RigLayer};
-use crate::tracker::{ControlMessage, QuatSource, Source, TrackingReport};
+use crate::tracker::{ControlMessage, TrackingReport};
 use core::ops::Mul;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::Arc;
@@ -69,36 +69,24 @@ impl RenderLayer {
         for config in &self.configs {
             if !config.visible {
                 return false;
-            }
-
-            match config.invisible_when {
-                None => (),
-                Some(rule) => {
-                    if rule.apply(report) {
-                        return false;
-                    }
+            } else if let Some(rule) = config.invisible_when {
+                if rule.apply(report) {
+                    return false;
                 }
-            }
-
-            match config.visible_when {
-                None => (),
-                Some(rule) => {
-                    if !rule.apply(report) {
-                        return false;
-                    }
+            } else if let Some(rule) = config.visible_when {
+                if !rule.apply(report) {
+                    return false;
                 }
             }
         }
         true
     }
 
-    fn rotation(&mut self, report: &TrackingReport) -> Mat4 {
-        // XXX this should respect configured rules
-        Mat4::from(QuatSource::HeadRotation.value(report))
-    }
-
     fn apply_transformation(&mut self, report: &TrackingReport) {
-        let transformation = self.rotation(report).mul(self.base_transformation);
+        let mut transformation = self.base_transformation;
+        for config in &self.configs {
+            transformation = config.transform(report).mul(transformation)
+        }
         self.model.set_transformation(transformation);
     }
 }
