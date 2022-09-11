@@ -44,7 +44,7 @@ impl Rig {
 
             let mut configs = Vec::new();
 
-            for name in [ora_layer.parent_names, vec![ora_layer.name.clone()]].concat() {
+            for name in [ora_layer.parent_names, vec![*ora_layer.name]].concat() {
                 if let Some(config) = config.layers.get(&name) {
                     configs.push(config.clone())
                 }
