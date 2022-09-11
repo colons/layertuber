@@ -47,14 +47,14 @@ impl Rule<Mat4> for FollowQuatRule {
 }
 
 #[derive(Debug, Deserialize, Copy, Clone)]
-pub struct ThreeDimensions {
+pub struct Translate3D {
     x: Option<f32>,
     y: Option<f32>,
     z: Option<f32>,
 }
 
-impl From<ThreeDimensions> for Vec3 {
-    fn from(s: ThreeDimensions) -> Vec3 {
+impl From<Translate3D> for Vec3 {
+    fn from(s: Translate3D) -> Vec3 {
         Vec3 {
             x: s.x.unwrap_or(0.0),
             y: s.y.unwrap_or(0.0),
@@ -78,7 +78,7 @@ pub struct LayerConfig {
     pub rotate_3d: Option<FollowQuatRule>,
 
     /// move absolutely in a direction
-    pub offset: Option<ThreeDimensions>,
+    pub offset: Option<Translate3D>,
 }
 
 impl LayerConfig {
