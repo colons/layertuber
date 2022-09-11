@@ -15,7 +15,10 @@ pub struct RigLayer {
     pub x: i32,
     pub y: i32,
     pub name: String,
-    pub config: config::LayerConfig,
+
+    /// layer configurations, in the order they should be applied (starting from the root of the
+    /// stack)
+    pub configs: Vec<config::LayerConfig>,
 }
 
 #[derive(Debug)]
@@ -31,26 +34,26 @@ impl Rig {
         let mut layers = Vec::new();
         let mut assets = RawAssets::new();
 
-        let mut config = config::load(ora_path)?;
+        let config = config::load(ora_path)?;
         let (width, height, ora_layers) = ora::read(&mut ora)?;
 
         for ora_layer in ora_layers {
             let mut buf = Vec::new();
             ora.by_name(&ora_layer.src)?.read_to_end(&mut buf)?;
             assets.insert(&ora_layer.src, buf);
+
+            let mut configs = Vec::new();
+
+            for name in [ora_layer.parent_names, vec![ora_layer.name.clone()]].concat() {
+                if let Some(config) = config.layers.get(&name) {
+                    configs.push(config.clone())
+                }
+            }
+
             layers.push(RigLayer {
                 x: ora_layer.x,
                 y: ora_layer.y,
-                config: match config.layers.remove(&ora_layer.name) {
-                    Some(c) => c,
-                    None => {
-                        eprintln!(
-                            "{} present in image but not present in config file",
-                            ora_layer.name
-                        );
-                        config::LayerConfig::default()
-                    }
-                },
+                configs,
                 name: ora_layer.name,
                 texture: from_asset(
                     assets
@@ -60,7 +63,7 @@ impl Rig {
             });
         }
 
-        // XXX print out the remaining config keys, since they're probably misconfigs
+        // XXX print out any unused config keys, since they're probably misconfigs
 
         Ok(Rig {
             width,

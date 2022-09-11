@@ -13,7 +13,7 @@ use three_d::{
 struct RenderLayer {
     model: Gm<Mesh, ColorMaterial>,
     base_transformation: Mat4,
-    config: LayerConfig,
+    configs: Vec<LayerConfig>,
 }
 
 impl RenderLayer {
@@ -39,7 +39,7 @@ impl RenderLayer {
 
         RenderLayer {
             base_transformation: translation.mul(scale.mul(Mat4::identity())),
-            config: rig_layer.config,
+            configs: rig_layer.configs.clone(),
             model: Gm::new(
                 Mesh::new(context, &CpuMesh::square()),
                 ColorMaterial {
@@ -66,24 +66,26 @@ impl RenderLayer {
     }
 
     fn currently_visible(&self, report: &TrackingReport) -> bool {
-        if !self.config.visible {
-            return false;
-        }
+        for config in &self.configs {
+            if !config.visible {
+                return false;
+            }
 
-        match self.config.invisible_when {
-            None => (),
-            Some(rule) => {
-                if rule.apply(report) {
-                    return false;
+            match config.invisible_when {
+                None => (),
+                Some(rule) => {
+                    if rule.apply(report) {
+                        return false;
+                    }
                 }
             }
-        }
 
-        match self.config.visible_when {
-            None => (),
-            Some(rule) => {
-                if !rule.apply(report) {
-                    return false;
+            match config.visible_when {
+                None => (),
+                Some(rule) => {
+                    if !rule.apply(report) {
+                        return false;
+                    }
                 }
             }
         }
