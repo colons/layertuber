@@ -1,50 +1,16 @@
-use crate::tracker::{FloatSource, QuatSource, Source, TrackingReport};
+pub use self::rules::Rule;
+use self::rules::{FollowQuatRule, ThresholdRule};
+use crate::tracker::TrackingReport;
+use core::ops::Mul;
 use serde::Deserialize;
 use serde_yaml::from_str;
 use std::collections::HashMap;
 use std::fs::File;
-use std::ops::Mul;
 use std::path::Path;
 use std::{io, io::Read};
-use three_d::{Mat4, Quaternion, SquareMatrix, Vec3};
+use three_d::{Mat4, SquareMatrix, Vec3};
 
-const IDENTITY_QUAT: Quaternion<f32> = Quaternion {
-    v: Vec3 {
-        x: 0.0,
-        y: 0.0,
-        z: 0.0,
-    },
-    s: 1.0,
-};
-
-pub trait Rule<T> {
-    fn apply(&self, report: &TrackingReport) -> T;
-}
-
-#[derive(Debug, Deserialize, Copy, Clone)]
-pub struct ThresholdRule {
-    source: FloatSource,
-    greater_than: f32,
-}
-
-impl Rule<bool> for ThresholdRule {
-    fn apply(&self, report: &TrackingReport) -> bool {
-        self.source.value(report) > self.greater_than
-    }
-}
-
-#[derive(Debug, Deserialize, Copy, Clone)]
-pub struct FollowQuatRule {
-    source: QuatSource,
-    scale: f32,
-}
-
-impl Rule<Mat4> for FollowQuatRule {
-    fn apply(&self, report: &TrackingReport) -> Mat4 {
-        let quat = self.source.value(report);
-        IDENTITY_QUAT.slerp(quat, self.scale).into()
-    }
-}
+mod rules;
 
 #[derive(Debug, Deserialize, Copy, Clone)]
 pub struct Translate3D {
