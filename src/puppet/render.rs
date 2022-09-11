@@ -8,7 +8,7 @@ use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
     degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, Event, FrameInput,
-    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, SquareMatrix, Texture2D, Vec3,
+    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, Texture2D, Vec3,
 };
 
 struct RenderLayer {
@@ -38,8 +38,15 @@ impl RenderLayer {
             1.0,
         );
 
+        let mut offset: Vec3 = Vec3::new(0.0, 0.0, 0.0);
+        for config in &rig_layer.configs {
+            if let Some(o) = config.offset {
+                offset += o.into();
+            }
+        }
+
         RenderLayer {
-            base_transformation: translation.mul(scale.mul(Mat4::identity())),
+            base_transformation: translation.mul(scale.mul(Mat4::from_translation(offset))),
             configs: rig_layer.configs.clone(),
             model: Gm::new(
                 Mesh::new(context, &CpuMesh::square()),

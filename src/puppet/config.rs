@@ -6,10 +6,10 @@ use std::fs::File;
 use std::ops::Mul;
 use std::path::Path;
 use std::{io, io::Read};
-use three_d::{Mat4, Quaternion, SquareMatrix, Vector3};
+use three_d::{Mat4, Quaternion, SquareMatrix, Vec3};
 
 const IDENTITY_QUAT: Quaternion<f32> = Quaternion {
-    v: Vector3 {
+    v: Vec3 {
         x: 0.0,
         y: 0.0,
         z: 0.0,
@@ -47,6 +47,23 @@ impl Rule<Mat4> for FollowQuatRule {
 }
 
 #[derive(Debug, Deserialize, Copy, Clone)]
+pub struct ThreeDimensions {
+    x: Option<f32>,
+    y: Option<f32>,
+    z: Option<f32>,
+}
+
+impl From<ThreeDimensions> for Vec3 {
+    fn from(s: ThreeDimensions) -> Vec3 {
+        Vec3 {
+            x: s.x.unwrap_or(0.0),
+            y: s.y.unwrap_or(0.0),
+            z: s.z.unwrap_or(0.0),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Copy, Clone)]
 pub struct LayerConfig {
     #[serde(default = "default_visible")]
     pub visible: bool,
@@ -59,6 +76,9 @@ pub struct LayerConfig {
 
     /// rotate in 3d with a source
     pub rotate_3d: Option<FollowQuatRule>,
+
+    /// move absolutely in a direction
+    pub offset: Option<ThreeDimensions>,
 }
 
 impl LayerConfig {

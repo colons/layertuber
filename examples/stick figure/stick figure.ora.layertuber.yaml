@@ -10,6 +10,10 @@ layers:
       source: head_rotation
       scale: 1
 
+  glasses:
+    offset:
+      z: 0.05
+
   face:
     follow_facing_point:
       source: head_rotation
