@@ -1,0 +1,25 @@
+## features
+
+- [x] visibility thresholds
+- [x] rotation tracking
+  - [ ] per-dimension sensitivity scaling
+- [ ] position tracking
+  - [ ] per-dimension sensitivity scalinng (lock y-axis for shadows, lock z axis if you just prefer to)
+- [ ] convert 3d rotation to lateral movement for custom rotation behaviour
+- don't hard-code:
+  - [ ] the path of the rig
+  - [ ] background colour
+  - openseeface options, particularly:
+    - [ ] camera index
+    - [ ] tracking feedback
+- [ ] z-offset for individual layers
+- [ ] layers toggleable at runtime (by pressing number keys?) for things like accessories
+- OpenRaster features:
+  - [x] groups
+  - [ ] opacity
+  - [ ] compositing modes
+- [ ] a gui for configuring rigs
+- [ ] audio input to improve mouth syncing
+- [ ] orthographic camera, perhaps? or granular perspective adjustment?
+- [ ] OBS integration, for easy transparency?
+- [ ] a web version, if possible?
