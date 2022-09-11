@@ -2,7 +2,7 @@
 The types here must reflect the types defined in tracking/report.py
 */
 use serde::Deserialize;
-use three_d::Quaternion;
+use three_d::{Quaternion, Vector3};
 
 #[derive(Deserialize, Debug)]
 pub struct TrackingReport {
@@ -85,13 +85,15 @@ impl Source<Quaternion<f32>> for QuatSource {
             QuatSource::HeadRotation => report.head_rotation,
         };
 
-        Quaternion::new(
-            // this ordering is weird because scipy deals in quats scalar-last, but three_d's are scalar-first
-            value[3],
-            // invert these to make the puppet behave like a mirror
-            -value[0], // pitch
-            -value[1], // yaw
-            -value[2], // roll
-        )
+        Quaternion {
+            v: Vector3 {
+                // invert these to make the puppet behave like a mirror
+                x: -value[0], // pitch
+                y: -value[1], // yaw
+                z: -value[2], // roll
+            },
+
+            s: value[3],
+        }
     }
 }
