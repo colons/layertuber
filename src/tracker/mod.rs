@@ -1,3 +1,4 @@
+use crate::Options;
 use dirs::cache_dir;
 use lazy_static::lazy_static;
 pub use report::{FloatSource, QuatSource, Source, TrackingReport, Vec2Source};
@@ -146,7 +147,10 @@ impl Iterator for FaceTracker {
     }
 }
 
-pub fn run_tracker(control_rx: Receiver<ControlMessage>) -> Result<FaceTracker, RunTrackerError> {
+pub fn run_tracker(
+    control_rx: Receiver<ControlMessage>,
+    options: &Options,
+) -> Result<FaceTracker, RunTrackerError> {
     let mut tracker_bin = File::create(TRACKER_BIN_PATH.as_path())?;
 
     #[cfg(not(debug_assertions))]
@@ -168,6 +172,13 @@ pub fn run_tracker(control_rx: Receiver<ControlMessage>) -> Result<FaceTracker, 
 
     #[cfg(debug_assertions)]
     args.extend(["python", "src/py/layertuber/__init__.py"].map(OsStr::new));
+
+    let camera_index = format!("--camera={}", options.camera_index);
+    args.push(&OsStr::new(&camera_index));
+
+    if options.show_features {
+        args.push(&OsStr::new("--show-features"))
+    }
 
     let p = Popen::create(
         &args,
