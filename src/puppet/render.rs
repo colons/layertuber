@@ -7,7 +7,7 @@ use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
 use three_d::{
     degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, Event, FrameInput,
-    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, SquareMatrix, Texture2D, Vec3,
+    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, SquareMatrix, Texture2D, Vec3, OrbitControl,
 };
 
 struct RenderLayer {
@@ -133,15 +133,18 @@ pub fn render(tracking_rx: Receiver<TrackingReport>, control_tx: Sender<ControlM
         10.0,
     );
 
+    let mut orbit_control = OrbitControl::new(*camera.target(), 1.0, 3.0);
+
     let mut render_layers: Vec<RenderLayer> = RenderLayer::from_rig(&rig, &context);
 
-    window.render_loop(move |frame_input: FrameInput| {
+    window.render_loop(move |mut frame_input: FrameInput| {
+        camera.set_viewport(frame_input.viewport);
+
+        orbit_control.handle_events(&mut camera, &mut frame_input.events);
         handle_input(&frame_input, &control_tx);
 
         let report = tracking_rx.recv().unwrap();
         let target = frame_input.screen();
-
-        camera.set_viewport(frame_input.viewport);
 
         target.clear(ClearState::color_and_depth(0.0, 1.0, 0.0, 1.0, 1.0));
 
