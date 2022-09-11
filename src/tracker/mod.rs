@@ -174,10 +174,10 @@ pub fn run_tracker(
     args.extend(["python", "src/py/layertuber/__init__.py"].map(OsStr::new));
 
     let camera_index = format!("--camera={}", options.camera_index);
-    args.push(&OsStr::new(&camera_index));
+    args.push(OsStr::new(&camera_index));
 
     if options.show_features {
-        args.push(&OsStr::new("--show-features"))
+        args.push(OsStr::new("--show-features"))
     }
 
     let p = Popen::create(

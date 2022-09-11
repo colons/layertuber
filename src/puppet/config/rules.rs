@@ -53,11 +53,11 @@ pub struct FollowVec2Rule {
 impl Rule<Vec3> for FollowVec2Rule {
     fn apply(&self, report: &TrackingReport) -> Vec3 {
         let value = self.source.value(report);
-        return Vec3 {
+        Vec3 {
             x: value.x * Vec3::from(self.scale).x,
             y: value.y * Vec3::from(self.scale).y,
             z: 0.0,
-        };
+        }
     }
 }
 
