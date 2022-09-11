@@ -24,11 +24,11 @@ layers:
   open mouth:
     visible_when:
       source: mouth_open
-      greater_than: 0.5
+      greater_than: 0.1
   closed mouth:
     invisible_when:
       source: mouth_open
-      greater_than: 0.5
+      greater_than: 0.1
 
   eye l closed:
     invisible_when:
@@ -45,8 +45,8 @@ layers:
     follow:
       source: gaze
       scale:
-        x: 0.2
-        y: 0.2
+        x: 0.1
+        y: 0.1
 
   eye r closed:
     invisible_when:
