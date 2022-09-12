@@ -1,7 +1,7 @@
 use obs_wrapper::{
     module::{LoadContext, Module, ModuleContext},
     obs_register_module, obs_string,
-    properties::{PathProp, PathType, Properties},
+    properties::{NumberProp, PathProp, PathType, Properties},
     source::*,
     string::ObsString,
 };
@@ -42,6 +42,18 @@ impl GetPropertiesSource for PuppetSource {
             PathProp::new(PathType::File),
         );
 
+        properties.add(
+            obs_string!("width"),
+            obs_string!("Render width (in pixels)"),
+            NumberProp::new_int().with_range(100..(2_usize).pow(16))
+        );
+
+        properties.add(
+            obs_string!("height"),
+            obs_string!("Render height (in pixels)"),
+            NumberProp::new_int().with_range(100..(2_usize).pow(16))
+        );
+
         properties
     }
 }
@@ -62,7 +74,7 @@ impl Sourceable for PuppetSource {
 
 impl VideoRenderSource for PuppetSource {
     fn video_render(&mut self, _context: &mut GlobalContext, _render: &mut VideoRenderContext) {
-        eprintln!("helo");
+        // eprintln!("helo");
     }
 }
 
