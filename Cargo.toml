@@ -3,6 +3,11 @@ name = "layertuber"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "layertuber_obs_source"
+crate-type = ["cdylib"]
+path = "src/obs_source.rs"
+
 [build-dependencies]
 subprocess = "0.2.9"
 
@@ -10,6 +15,7 @@ subprocess = "0.2.9"
 argparse = "0.2.2"
 dirs = "4.0"
 lazy_static = "1.4"
+obs-wrapper = "0.3"
 png = "0.17.5"
 serde = { version = "1.0", features = ["serde_derive"] }
 serde-xml-rs = "0.6.0"
