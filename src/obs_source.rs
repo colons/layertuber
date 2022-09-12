@@ -1,12 +1,36 @@
 use obs_wrapper::{
+    data::DataObj,
     module::{LoadContext, Module, ModuleContext},
     obs_register_module, obs_string,
     properties::{NumberProp, PathProp, PathType, Properties},
     source::*,
     string::ObsString,
 };
+use std::borrow::Cow;
 
-struct PuppetSource;
+struct PuppetSource {
+    width: u32,
+    height: u32,
+    path: Option<String>,
+}
+
+impl PuppetSource {
+    fn update_settings(&mut self, settings: &DataObj) {
+        if let Some(width) = settings.get(obs_string!("width")) {
+            self.width = width
+        }
+
+        if let Some(height) = settings.get(obs_string!("height")) {
+            self.height = height
+        }
+
+        let path: Option<Cow<'_, str>> = settings.get(obs_string!("path"));
+        self.path = match path {
+            Some(p) => Some(p.into_owned()),
+            None => None,
+        }
+    }
+}
 
 impl ActivateSource for PuppetSource {
     fn activate(&mut self) {
@@ -22,13 +46,19 @@ impl DeactivateSource for PuppetSource {
 
 impl GetWidthSource for PuppetSource {
     fn get_width(&mut self) -> u32 {
-        200
+        self.width
     }
 }
 
 impl GetHeightSource for PuppetSource {
     fn get_height(&mut self) -> u32 {
-        200
+        self.height
+    }
+}
+
+impl UpdateSource for PuppetSource {
+    fn update(&mut self, settings: &mut DataObj, _context: &mut GlobalContext) {
+        self.update_settings(settings);
     }
 }
 
@@ -45,13 +75,13 @@ impl GetPropertiesSource for PuppetSource {
         properties.add(
             obs_string!("width"),
             obs_string!("Render width (in pixels)"),
-            NumberProp::new_int().with_range(100..(2_usize).pow(16))
+            NumberProp::new_int().with_range(100..(2_u32).pow(16)),
         );
 
         properties.add(
             obs_string!("height"),
             obs_string!("Render height (in pixels)"),
-            NumberProp::new_int().with_range(100..(2_usize).pow(16))
+            NumberProp::new_int().with_range(100..(2_u32).pow(16)),
         );
 
         properties
@@ -67,8 +97,15 @@ impl Sourceable for PuppetSource {
         SourceType::INPUT
     }
 
-    fn create(_create: &mut CreatableSourceContext<Self>, _source: SourceContext) -> Self {
-        PuppetSource {}
+    fn create(create: &mut CreatableSourceContext<Self>, _source: SourceContext) -> Self {
+        let mut source = PuppetSource {
+            width: 100,
+            height: 100,
+            path: None,
+        };
+        source.update_settings(&create.settings);
+
+        source
     }
 }
 
@@ -103,6 +140,7 @@ impl Module for LayertuberModule {
             .enable_get_width()
             .enable_get_height()
             .enable_get_properties()
+            .enable_update()
             .build();
         load_context.register_source(source);
         true
