@@ -1,11 +1,42 @@
 use obs_wrapper::{
     module::{LoadContext, Module, ModuleContext},
     obs_register_module, obs_string,
-    source::{CreatableSourceContext, GetNameSource, SourceContext, SourceType, Sourceable},
+    properties::Properties,
+    source::*,
     string::ObsString,
 };
 
 struct PuppetSource;
+
+impl ActivateSource for PuppetSource {
+    fn activate(&mut self) {
+        eprintln!("activating")
+    }
+}
+
+impl DeactivateSource for PuppetSource {
+    fn deactivate(&mut self) {
+        eprintln!("deactivating")
+    }
+}
+
+impl GetWidthSource for PuppetSource {
+    fn get_width(&mut self) -> u32 {
+        200
+    }
+}
+
+impl GetHeightSource for PuppetSource {
+    fn get_height(&mut self) -> u32 {
+        200
+    }
+}
+
+impl GetPropertiesSource for PuppetSource {
+    fn get_properties(&mut self) -> Properties {
+        Properties::new()
+    }
+}
 
 impl Sourceable for PuppetSource {
     fn get_id() -> ObsString {
@@ -18,6 +49,12 @@ impl Sourceable for PuppetSource {
 
     fn create(_create: &mut CreatableSourceContext<Self>, _source: SourceContext) -> Self {
         PuppetSource {}
+    }
+}
+
+impl VideoRenderSource for PuppetSource {
+    fn video_render(&mut self, _context: &mut GlobalContext, _render: &mut VideoRenderContext) {
+        eprintln!("helo");
     }
 }
 
@@ -40,6 +77,12 @@ impl Module for LayertuberModule {
         let source = load_context
             .create_source_builder::<PuppetSource>()
             .enable_get_name()
+            .enable_video_render()
+            .enable_activate()
+            .enable_deactivate()
+            .enable_get_width()
+            .enable_get_height()
+            .enable_get_properties()
             .build();
         load_context.register_source(source);
         true
