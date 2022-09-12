@@ -1,7 +1,7 @@
 use obs_wrapper::{
     module::{LoadContext, Module, ModuleContext},
     obs_register_module, obs_string,
-    properties::Properties,
+    properties::{PathProp, PathType, Properties},
     source::*,
     string::ObsString,
 };
@@ -34,7 +34,15 @@ impl GetHeightSource for PuppetSource {
 
 impl GetPropertiesSource for PuppetSource {
     fn get_properties(&mut self) -> Properties {
-        Properties::new()
+        let mut properties = Properties::new();
+
+        properties.add(
+            obs_string!("puppet"),
+            obs_string!("Puppet .ora file"),
+            PathProp::new(PathType::File),
+        );
+
+        properties
     }
 }
 
