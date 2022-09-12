@@ -27,14 +27,14 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./.github/actions/setup
       - run: cargo build -r
-      - run: du -sh target/release/layertuber
-      - run: du -sh target/release/liblayertuber_obs_source.so
       - uses: actions/upload-artifact@v3
         with:
           name: layertuber
-          path: |
-            target/release/layertuber
-            target/release/liblayertuber_obs_source.so
+          path: target/release/layertuber
+      - uses: actions/upload-artifact@v3
+        with:
+          name: obs plugin
+          path: target/release/liblayertuber_obs_source.so
 
   rustfmt:
     runs-on: ubuntu-latest
