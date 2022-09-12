@@ -13,6 +13,10 @@ runs:
       run: sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0
       shell: bash
 
+    - name: install obs-wrapper deps
+      run: sudo apt install libobs-dev
+      shell: bash
+
     - run: pip install '.[dev]'
       shell: bash
 
