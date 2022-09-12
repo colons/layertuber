@@ -25,10 +25,7 @@ impl PuppetSource {
         }
 
         let path: Option<Cow<'_, str>> = settings.get(obs_string!("path"));
-        self.path = match path {
-            Some(p) => Some(p.into_owned()),
-            None => None,
-        }
+        self.path = path.map(|p| p.into_owned())
     }
 }
 
