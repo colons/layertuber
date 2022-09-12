@@ -6,7 +6,7 @@ edition = "2021"
 [lib]
 name = "layertuber_obs_source"
 crate-type = ["cdylib"]
-path = "src/obs_source.rs"
+path = "src/obs_source/lib.rs"
 
 [build-dependencies]
 subprocess = "0.2.9"
