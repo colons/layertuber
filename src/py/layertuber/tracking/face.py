@@ -101,20 +101,23 @@ class FaceTracker:
                 blink_right=eye_blink[1],
                 blink=sum(eye_blink) / len(eye_blink),
 
-                eyebrow_quirk_left=features['eyebrow_quirk_l'],
-                eyebrow_quirk_right=features['eyebrow_quirk_r'],
-                eyebrow_quirk=(features['eyebrow_quirk_l'] + features['eyebrow_quirk_r']) / 2,
+                # it would be nice if these .get('whatever', 0) checks could be
+                # None when not present, leaving it up to the renderer to
+                # decide how to handle missing report attributes:
+                eyebrow_quirk_left=features.get('eyebrow_quirk_l', 0),
+                eyebrow_quirk_right=features.get('eyebrow_quirk_r', 0),
+                eyebrow_quirk=(features.get('eyebrow_quirk_l', 0) + features.get('eyebrow_quirk_r', 0)) / 2,
 
-                eyebrow_steepness_left=features['eyebrow_steepness_l'],
-                eyebrow_steepness_right=features['eyebrow_steepness_r'],
-                eyebrow_steepness=(features['eyebrow_steepness_l'] + features['eyebrow_steepness_r']) / 2,
+                eyebrow_steepness_left=features.get('eyebrow_steepness_l', 0),
+                eyebrow_steepness_right=features.get('eyebrow_steepness_r', 0),
+                eyebrow_steepness=(features.get('eyebrow_steepness_l', 0) + features.get('eyebrow_steepness_r', 0)) / 2,
 
-                eyebrow_updown_left=features['eyebrow_updown_l'],
-                eyebrow_updown_right=features['eyebrow_updown_r'],
-                eyebrow_updown=(features['eyebrow_updown_l'] + features['eyebrow_updown_r']) / 2,
+                eyebrow_updown_left=features.get('eyebrow_updown_l', 0),
+                eyebrow_updown_right=features.get('eyebrow_updown_r', 0),
+                eyebrow_updown=(features.get('eyebrow_updown_l', 0) + features.get('eyebrow_updown_r', 0)) / 2,
 
-                mouth_open=features['mouth_open'],
-                mouth_wide=features['mouth_wide'],
+                mouth_open=features.get('mouth_open', 0),
+                mouth_wide=features.get('mouth_wide', 0),
             ),
             rotations=dict(
                 head_rotation=Rotation.from_quat(face.quaternion),
