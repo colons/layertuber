@@ -45,8 +45,8 @@ layers:
     follow:
       source: gaze
       scale:
-        x: 0.1
-        y: 0.1
+        x: 0.2
+        y: 0.2
 
   eye r closed:
     invisible_when:
