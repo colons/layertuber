@@ -1,20 +1,25 @@
 use obs_wrapper::{
     data::DataObj,
     obs_string,
-    properties::{NumberProp, PathProp, PathType, Properties},
+    properties::{BoolProp, NumberProp, PathProp, PathType, Properties},
     source::*,
     string::ObsString,
 };
 use std::borrow::Cow;
 
 pub struct PuppetSource {
+    path: Option<String>,
     width: u32,
     height: u32,
-    path: Option<String>,
+    camera_index: u32,
+    show_features: bool,
 }
 
 impl PuppetSource {
     fn update_settings(&mut self, settings: &DataObj) {
+        let path: Option<Cow<'_, str>> = settings.get(obs_string!("path"));
+        self.path = path.map(|p| p.into_owned());
+
         if let Some(width) = settings.get(obs_string!("width")) {
             self.width = width
         }
@@ -23,8 +28,13 @@ impl PuppetSource {
             self.height = height
         }
 
-        let path: Option<Cow<'_, str>> = settings.get(obs_string!("path"));
-        self.path = path.map(|p| p.into_owned())
+        if let Some(camera_index) = settings.get(obs_string!("camera_index")) {
+            self.camera_index = camera_index
+        }
+
+        if let Some(show_features) = settings.get(obs_string!("show_features")) {
+            self.show_features = show_features
+        }
     }
 }
 
@@ -39,9 +49,11 @@ impl Sourceable for PuppetSource {
 
     fn create(create: &mut CreatableSourceContext<Self>, _source: SourceContext) -> Self {
         let mut source = PuppetSource {
+            path: None,
             width: 100,
             height: 100,
-            path: None,
+            camera_index: 0,
+            show_features: false,
         };
         source.update_settings(&create.settings);
 
@@ -69,6 +81,18 @@ impl GetPropertiesSource for PuppetSource {
             obs_string!("height"),
             obs_string!("Render height (in pixels)"),
             NumberProp::new_int().with_range(100..(2_u32).pow(16)),
+        );
+
+        properties.add(
+            obs_string!("camera_index"),
+            obs_string!("Camera index"),
+            NumberProp::new_int().with_range(0..64),
+        );
+
+        properties.add(
+            obs_string!("show_features"),
+            obs_string!("Show features"),
+            BoolProp,
         );
 
         properties
