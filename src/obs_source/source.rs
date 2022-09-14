@@ -1,4 +1,4 @@
-use crate::Options;
+use crate::puppet::Rig;
 use obs_wrapper::{
     data::DataObj,
     obs_string,
@@ -7,7 +7,7 @@ use obs_wrapper::{
     string::ObsString,
 };
 use std::borrow::Cow;
-use std::path::PathBuf;
+use std::path::Path;
 
 pub struct PuppetSource {
     path: Option<String>,
@@ -15,6 +15,7 @@ pub struct PuppetSource {
     height: u32,
     camera_index: u8,
     show_features: bool,
+    rig: Option<Rig>,
 }
 
 impl PuppetSource {
@@ -37,13 +38,18 @@ impl PuppetSource {
         if let Some(show_features) = settings.get(obs_string!("show_features")) {
             self.show_features = show_features
         }
-    }
 
-    fn options(&self) -> Options {
-        Options {
-            path: PathBuf::from(self.path.as_ref().expect("path was empty, somehow")),
-            camera_index: self.camera_index,
-            show_features: self.show_features,
+        self.rig = match &self.path {
+            Some(p) => {
+                match Rig::open(Path::new(p.as_str())) {
+                    Ok(r) => Some(r),
+                    Err(e) => {
+                        eprintln!("failed to load rig: {}", e);
+                        None
+                    }
+                }
+            }
+            None => None
         }
     }
 }
@@ -64,6 +70,7 @@ impl Sourceable for PuppetSource {
             height: 100,
             camera_index: 0,
             show_features: false,
+            rig: None,
         };
         source.update_settings(&create.settings);
 

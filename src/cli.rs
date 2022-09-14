@@ -1,6 +1,6 @@
+use crate::{puppet, tracker, Options};
 use std::sync::mpsc::{channel, sync_channel};
 use std::thread;
-use crate::{tracker, puppet, Options};
 
 pub fn run_cli() {
     let options = Options::from_arguments();
