@@ -19,6 +19,24 @@ pub struct PuppetSource {
 }
 
 impl PuppetSource {
+    fn reload_rig(&mut self) {
+        self.rig = match &self.path {
+            Some(p) => {
+                match Rig::open(Path::new(p.as_str())) {
+                    Ok(r) => Some(r),
+                    Err(e) => {
+                        eprintln!("failed to load rig: {}", e);
+                        None
+                    }
+                }
+            }
+            None => {
+                eprintln!("path not set");
+                None
+            }
+        }
+    }
+
     fn update_settings(&mut self, settings: &DataObj) {
         let path: Option<Cow<'_, str>> = settings.get(obs_string!("path"));
         self.path = path.map(|p| p.into_owned());
@@ -39,18 +57,6 @@ impl PuppetSource {
             self.show_features = show_features
         }
 
-        self.rig = match &self.path {
-            Some(p) => {
-                match Rig::open(Path::new(p.as_str())) {
-                    Ok(r) => Some(r),
-                    Err(e) => {
-                        eprintln!("failed to load rig: {}", e);
-                        None
-                    }
-                }
-            }
-            None => None
-        }
     }
 }
 
@@ -83,7 +89,7 @@ impl GetPropertiesSource for PuppetSource {
         let mut properties = Properties::new();
 
         properties.add(
-            obs_string!("puppet"),
+            obs_string!("path"),
             obs_string!("Puppet .ora file"),
             PathProp::new(PathType::File),
         );
@@ -118,13 +124,14 @@ impl GetPropertiesSource for PuppetSource {
 
 impl ActivateSource for PuppetSource {
     fn activate(&mut self) {
-        eprintln!("activating")
+        eprintln!("activating...");
+        self.reload_rig();
     }
 }
 
 impl DeactivateSource for PuppetSource {
     fn deactivate(&mut self) {
-        eprintln!("deactivating")
+        self.rig = None
     }
 }
 

@@ -36,8 +36,11 @@ impl Rig {
 
         let config = config::load(ora_path)?;
         let (width, height, ora_layers) = ora::read(&mut ora)?;
+        let layer_count = ora_layers.len();
 
-        for ora_layer in ora_layers {
+        for (i, ora_layer) in ora_layers.into_iter().enumerate() {
+            eprintln!("loading layer {} / {}: {}", i, layer_count, ora_layer.name);
+
             let mut buf = Vec::new();
             ora.by_name(&ora_layer.src)?.read_to_end(&mut buf)?;
             assets.insert(&ora_layer.src, buf);
