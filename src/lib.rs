@@ -1,11 +1,14 @@
-use self::source::PuppetSource;
+use crate::obs_source::PuppetSource;
 use obs_wrapper::{
     module::{LoadContext, Module, ModuleContext},
     obs_register_module, obs_string,
     string::ObsString,
 };
 
-mod source;
+mod obs_source;
+mod options;
+mod puppet;
+mod tracker;
 
 struct LayertuberModule {
     context: ModuleContext,

@@ -1,3 +1,4 @@
+use crate::options::Options;
 use obs_wrapper::{
     data::DataObj,
     obs_string,
@@ -6,12 +7,13 @@ use obs_wrapper::{
     string::ObsString,
 };
 use std::borrow::Cow;
+use std::path::PathBuf;
 
 pub struct PuppetSource {
     path: Option<String>,
     width: u32,
     height: u32,
-    camera_index: u32,
+    camera_index: u8,
     show_features: bool,
 }
 
@@ -34,6 +36,14 @@ impl PuppetSource {
 
         if let Some(show_features) = settings.get(obs_string!("show_features")) {
             self.show_features = show_features
+        }
+    }
+
+    fn options(&self) -> Options {
+        Options {
+            path: PathBuf::from(self.path.as_ref().expect("path was empty, somehow")),
+            camera_index: self.camera_index,
+            show_features: self.show_features,
         }
     }
 }

@@ -4,9 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "layertuber_obs_source"
+name = "layertuber"
 crate-type = ["cdylib"]
-path = "src/obs_source/lib.rs"
 
 [build-dependencies]
 subprocess = "0.2.9"
