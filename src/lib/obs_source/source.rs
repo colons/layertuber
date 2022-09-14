@@ -1,4 +1,4 @@
-use crate::options::Options;
+use crate::Options;
 use obs_wrapper::{
     data::DataObj,
     obs_string,

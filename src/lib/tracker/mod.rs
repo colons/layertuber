@@ -1,4 +1,4 @@
-use crate::options::Options;
+use crate::Options;
 use dirs::cache_dir;
 use lazy_static::lazy_static;
 pub use report::{FloatSource, QuatSource, Source, TrackingReport, Vec2Source};
