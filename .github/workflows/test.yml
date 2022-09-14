@@ -34,7 +34,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: obs plugin
-          path: target/release/liblayertuber_obs_source.so
+          path: target/release/liblayertuber.so
 
   rustfmt:
     runs-on: ubuntu-latest
