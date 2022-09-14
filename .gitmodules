@@ -1,3 +1,3 @@
 [submodule "src/layertuber/vendor/OpenSeeFace"]
-	path = src/lib/py/layertuber/vendor/OpenSeeFace
+	path = src/py/layertuber/vendor/OpenSeeFace
 	url = https://github.com/emilianavt/OpenSeeFace.git

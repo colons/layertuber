@@ -5,12 +5,8 @@ edition = "2021"
 
 [lib]
 name = "layertuber"
-crate-type = ["cdylib"]
-path = "src/lib/mod.rs"
-
-[[bin]]
-name = "layertuber"
-path = "src/bin.rs"
+crate-type = ["cdylib", "lib"]
+path = "src/lib.rs"
 
 [build-dependencies]
 subprocess = "0.2.9"
