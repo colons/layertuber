@@ -10,6 +10,12 @@ use obs_wrapper::{
 use std::borrow::Cow;
 use std::path::Path;
 
+const SETTING_PATH: ObsString = obs_string!("path");
+const SETTING_WIDTH: ObsString = obs_string!("width");
+const SETTING_HEIGHT: ObsString = obs_string!("height");
+const SETTING_CAMERA_INDEX: ObsString = obs_string!("camera_index");
+const SETTING_SHOW_FEATURES: ObsString = obs_string!("show_features");
+
 pub struct PuppetSource {
     tex: GraphicsTexture,
     path: Option<String>,
@@ -37,20 +43,20 @@ impl PuppetSource {
     }
 
     fn update_settings(&mut self, settings: &DataObj) {
-        let path: Option<Cow<'_, str>> = settings.get(obs_string!("path"));
+        let path: Option<Cow<'_, str>> = settings.get(SETTING_PATH);
         self.path = path.map(|p| p.into_owned());
 
-        if let Some(width) = settings.get(obs_string!("width")) {
-            if let Some(height) = settings.get(obs_string!("height")) {
+        if let Some(width) = settings.get(SETTING_WIDTH) {
+            if let Some(height) = settings.get(SETTING_HEIGHT) {
                 self.tex = GraphicsTexture::new(width, height, GraphicsColorFormat::RGBA);
             }
         }
 
-        if let Some(camera_index) = settings.get(obs_string!("camera_index")) {
+        if let Some(camera_index) = settings.get(SETTING_CAMERA_INDEX) {
             self.camera_index = camera_index
         }
 
-        if let Some(show_features) = settings.get(obs_string!("show_features")) {
+        if let Some(show_features) = settings.get(SETTING_SHOW_FEATURES) {
             self.show_features = show_features
         }
 
@@ -115,31 +121,31 @@ impl GetPropertiesSource for PuppetSource {
         let mut properties = Properties::new();
 
         properties.add(
-            obs_string!("path"),
+            SETTING_PATH,
             obs_string!("Puppet .ora file"),
             PathProp::new(PathType::File),
         );
 
         properties.add(
-            obs_string!("width"),
+            SETTING_WIDTH,
             obs_string!("Render width (in pixels)"),
             NumberProp::new_int().with_range(100..(2_u32).pow(16)),
         );
 
         properties.add(
-            obs_string!("height"),
+            SETTING_HEIGHT,
             obs_string!("Render height (in pixels)"),
             NumberProp::new_int().with_range(100..(2_u32).pow(16)),
         );
 
         properties.add(
-            obs_string!("camera_index"),
+            SETTING_CAMERA_INDEX,
             obs_string!("Camera index"),
             NumberProp::new_int().with_range(0..64),
         );
 
         properties.add(
-            obs_string!("show_features"),
+            SETTING_SHOW_FEATURES,
             obs_string!("Show features"),
             BoolProp,
         );
