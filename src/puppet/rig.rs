@@ -40,7 +40,12 @@ impl Rig {
         let layer_count = ora_layers.len();
 
         for (i, ora_layer) in ora_layers.into_iter().enumerate() {
-            info!("loading layer {} / {}: {}", i + 1, layer_count, ora_layer.name);
+            info!(
+                "loading layer {} / {}: {}",
+                i + 1,
+                layer_count,
+                ora_layer.name
+            );
 
             let mut buf = Vec::new();
             ora.by_name(&ora_layer.src)?.read_to_end(&mut buf)?;
