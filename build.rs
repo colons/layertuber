@@ -9,7 +9,7 @@ fn build_pyinstaller() {
         }
     }
 
-    env::set_current_dir(Path::new("src/lib/py")).expect("could not enter python build directory");
+    env::set_current_dir(Path::new("src/py")).expect("could not enter python build directory");
 
     let mut p = Popen::create(
         &[
