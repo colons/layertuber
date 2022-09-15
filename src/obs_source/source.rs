@@ -20,7 +20,7 @@ pub struct PuppetSource {
 
 impl PuppetSource {
     fn reload_rig(&mut self) {
-        // this should happen asyncronously, but i need to learn things first
+        // XXX this should happen asyncronously, but i need to learn things first
         self.rig = match &self.path {
             Some(p) => match Rig::open(Path::new(p.as_str())) {
                 Ok(r) => Some(r),
@@ -83,6 +83,7 @@ impl Sourceable for PuppetSource {
             obs_string!("Reset puppet position"),
             |key, _data| {
                 if key.pressed {
+                    // XXX implement this
                     eprintln!("calibration requested")
                 }
             },
