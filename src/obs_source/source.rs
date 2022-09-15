@@ -1,6 +1,7 @@
 use crate::puppet::Rig;
 use obs_wrapper::{
     data::DataObj,
+    graphics::{GraphicsColorFormat, GraphicsTexture},
     obs_string,
     properties::{BoolProp, NumberProp, PathProp, PathType, Properties},
     source::*,
@@ -10,9 +11,8 @@ use std::borrow::Cow;
 use std::path::Path;
 
 pub struct PuppetSource {
+    tex: GraphicsTexture,
     path: Option<String>,
-    width: u32,
-    height: u32,
     camera_index: u8,
     show_features: bool,
     rig: Option<Rig>,
@@ -41,11 +41,9 @@ impl PuppetSource {
         self.path = path.map(|p| p.into_owned());
 
         if let Some(width) = settings.get(obs_string!("width")) {
-            self.width = width
-        }
-
-        if let Some(height) = settings.get(obs_string!("height")) {
-            self.height = height
+            if let Some(height) = settings.get(obs_string!("height")) {
+                self.tex = GraphicsTexture::new(width, height, GraphicsColorFormat::RGBA);
+            }
         }
 
         if let Some(camera_index) = settings.get(obs_string!("camera_index")) {
@@ -69,9 +67,8 @@ impl Sourceable for PuppetSource {
 
     fn create(create: &mut CreatableSourceContext<Self>, _source: SourceContext) -> Self {
         let mut source = PuppetSource {
+            tex: GraphicsTexture::new(100, 100, GraphicsColorFormat::RGBA),
             path: None,
-            width: 100,
-            height: 100,
             camera_index: 0,
             show_features: false,
             rig: None,
@@ -146,13 +143,13 @@ impl DeactivateSource for PuppetSource {
 
 impl GetWidthSource for PuppetSource {
     fn get_width(&mut self) -> u32 {
-        self.width
+        self.tex.width()
     }
 }
 
 impl GetHeightSource for PuppetSource {
     fn get_height(&mut self) -> u32 {
-        self.height
+        self.tex.height()
     }
 }
 
@@ -164,7 +161,23 @@ impl UpdateSource for PuppetSource {
 
 impl VideoRenderSource for PuppetSource {
     fn video_render(&mut self, _context: &mut GlobalContext, _render: &mut VideoRenderContext) {
-        // eprintln!("helo");
+        let mut pixels = Vec::new();
+
+        for row in 0..self.tex.height() {
+            for col in 0..self.tex.width() {
+                pixels.extend_from_slice(&[
+                    (row as f32 / self.tex.height() as f32 * 256.0) as u8,
+                    (col as f32 / self.tex.width() as f32 * 256.0) as u8,
+                    14,
+                    255,
+                ])
+            }
+        }
+
+        self.tex
+            .set_image(pixels.as_slice(), self.tex.width() * 4, false);
+        self.tex
+            .draw(0, 0, self.tex.width(), self.tex.height(), false);
     }
 }
 
