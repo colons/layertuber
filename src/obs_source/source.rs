@@ -22,15 +22,13 @@ impl PuppetSource {
     fn reload_rig(&mut self) {
         // this should happen asyncronously, but i need to learn things first
         self.rig = match &self.path {
-            Some(p) => {
-                match Rig::open(Path::new(p.as_str())) {
-                    Ok(r) => Some(r),
-                    Err(e) => {
-                        eprintln!("failed to load rig: {}", e);
-                        None
-                    }
+            Some(p) => match Rig::open(Path::new(p.as_str())) {
+                Ok(r) => Some(r),
+                Err(e) => {
+                    eprintln!("failed to load rig: {}", e);
+                    None
                 }
-            }
+            },
             None => {
                 eprintln!("path not set");
                 None
@@ -57,7 +55,6 @@ impl PuppetSource {
         if let Some(show_features) = settings.get(obs_string!("show_features")) {
             self.show_features = show_features
         }
-
     }
 }
 
