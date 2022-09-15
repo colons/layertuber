@@ -53,6 +53,26 @@ impl PuppetSource {
         if let Some(show_features) = settings.get(obs_string!("show_features")) {
             self.show_features = show_features
         }
+
+        self.render();
+    }
+
+    fn render(&mut self) {
+        let mut pixels = Vec::new();
+
+        for row in 0..self.tex.height() {
+            for col in 0..self.tex.width() {
+                pixels.extend_from_slice(&[
+                    (row as f32 / self.tex.height() as f32 * 256.0) as u8,
+                    (col as f32 / self.tex.width() as f32 * 256.0) as u8,
+                    14,
+                    255,
+                ])
+            }
+        }
+
+        self.tex
+            .set_image(pixels.as_slice(), self.tex.width() * 4, false);
     }
 }
 
@@ -161,21 +181,6 @@ impl UpdateSource for PuppetSource {
 
 impl VideoRenderSource for PuppetSource {
     fn video_render(&mut self, _context: &mut GlobalContext, _render: &mut VideoRenderContext) {
-        let mut pixels = Vec::new();
-
-        for row in 0..self.tex.height() {
-            for col in 0..self.tex.width() {
-                pixels.extend_from_slice(&[
-                    (row as f32 / self.tex.height() as f32 * 256.0) as u8,
-                    (col as f32 / self.tex.width() as f32 * 256.0) as u8,
-                    14,
-                    255,
-                ])
-            }
-        }
-
-        self.tex
-            .set_image(pixels.as_slice(), self.tex.width() * 4, false);
         self.tex
             .draw(0, 0, self.tex.width(), self.tex.height(), false);
     }
