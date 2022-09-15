@@ -20,6 +20,7 @@ pub struct PuppetSource {
 
 impl PuppetSource {
     fn reload_rig(&mut self) {
+        // this should happen asyncronously, but i need to learn things first
         self.rig = match &self.path {
             Some(p) => {
                 match Rig::open(Path::new(p.as_str())) {
