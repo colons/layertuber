@@ -78,6 +78,16 @@ impl Sourceable for PuppetSource {
         };
         source.update_settings(&create.settings);
 
+        create.register_hotkey(
+            obs_string!("calibrate"),
+            obs_string!("Reset puppet position"),
+            |key, _data| {
+                if key.pressed {
+                    eprintln!("calibration requested")
+                }
+            },
+        );
+
         source
     }
 }
