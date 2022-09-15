@@ -1,6 +1,7 @@
 use crate::Options;
 use dirs::cache_dir;
 use lazy_static::lazy_static;
+use log::{error, info};
 pub use report::{FloatSource, QuatSource, Source, TrackingReport, Vec2Source};
 use std::ffi::OsStr;
 use std::fs;
@@ -194,8 +195,8 @@ pub fn run_tracker(
         control_rx,
         Box::new(|| {
             match fs::remove_file(TRACKER_BIN_PATH.as_path()) {
-                Ok(_) => eprintln!("deleted tracker"),
-                Err(e) => eprintln!("tracker deletion failed: {}", e),
+                Ok(_) => info!("deleted tracker"),
+                Err(e) => error!("tracker deletion failed: {}", e),
             };
         }),
     );

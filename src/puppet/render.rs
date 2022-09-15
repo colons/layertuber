@@ -3,6 +3,7 @@ use super::config::{LayerConfig, Rule};
 use super::rig::{Rig, RigLayer};
 use crate::tracker::{ControlMessage, TrackingReport};
 use core::ops::Mul;
+use log::info;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::Arc;
 use three_d::window::{Window, WindowSettings};
@@ -111,12 +112,12 @@ fn handle_input(frame_input: &FrameInput, control_tx: &Sender<ControlMessage>) {
                 kind: Key::C,
                 modifiers: _,
                 handled: _,
-            } => eprintln!("this should reset the camera"),
+            } => info!("this should reset the camera"), // XXX
             Event::KeyPress {
                 kind: Key::Space,
                 modifiers: _,
                 handled: _,
-            } => eprintln!("this toggle gui elements, once they exist"),
+            } => info!("this toggle gui elements, once they exist"), // XXX
             _ => (),
         }
     }

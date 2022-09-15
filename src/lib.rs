@@ -1,6 +1,7 @@
 use crate::obs_source::PuppetSource;
 pub use crate::options::Options;
 use obs_wrapper::{
+    log::Logger,
     module::{LoadContext, Module, ModuleContext},
     obs_register_module, obs_string,
     string::ObsString,
@@ -23,6 +24,10 @@ impl Module for LayertuberModule {
     }
 
     fn load(&mut self, load_context: &mut LoadContext) -> bool {
+        if let Ok(()) = Logger::new().init() {
+            log::set_max_level(log::LevelFilter::Info)
+        }
+
         let source = load_context
             .create_source_builder::<PuppetSource>()
             .enable_get_name()

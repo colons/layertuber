@@ -1,6 +1,7 @@
 use super::config;
 use super::conv::from_asset;
 use super::ora;
+use log::info;
 use std::fs::File;
 use std::io;
 use std::io::Read;
@@ -39,7 +40,7 @@ impl Rig {
         let layer_count = ora_layers.len();
 
         for (i, ora_layer) in ora_layers.into_iter().enumerate() {
-            eprintln!("loading layer {} / {}: {}", i, layer_count, ora_layer.name);
+            info!("loading layer {} / {}: {}", i, layer_count, ora_layer.name);
 
             let mut buf = Vec::new();
             ora.by_name(&ora_layer.src)?.read_to_end(&mut buf)?;

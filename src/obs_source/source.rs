@@ -1,4 +1,5 @@
 use crate::puppet::Rig;
+use log::{error, info};
 use obs_wrapper::{
     data::DataObj,
     graphics::{GraphicsColorFormat, GraphicsTexture},
@@ -31,12 +32,12 @@ impl PuppetSource {
             Some(p) => match Rig::open(Path::new(p.as_str())) {
                 Ok(r) => Some(r),
                 Err(e) => {
-                    eprintln!("failed to load rig: {}", e);
+                    error!("failed to load rig: {}", e);
                     None
                 }
             },
             None => {
-                eprintln!("path not set");
+                info!("path not set");
                 None
             }
         }
@@ -107,7 +108,7 @@ impl Sourceable for PuppetSource {
             |key, _data| {
                 if key.pressed {
                     // XXX implement this
-                    eprintln!("calibration requested")
+                    info!("calibration requested")
                 }
             },
         );
@@ -156,7 +157,7 @@ impl GetPropertiesSource for PuppetSource {
 
 impl ActivateSource for PuppetSource {
     fn activate(&mut self) {
-        eprintln!("activating...");
+        info!("activating...");
         self.reload_rig();
     }
 }

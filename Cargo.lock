@@ -903,6 +903,7 @@ dependencies = [
  "argparse",
  "dirs",
  "lazy_static",
+ "log",
  "obs-wrapper",
  "png",
  "serde",
