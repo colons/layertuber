@@ -10,6 +10,7 @@ use obs_wrapper::{
 };
 use std::borrow::Cow;
 use std::path::Path;
+use std::thread;
 
 const SETTING_PATH: ObsString = obs_string!("path");
 const SETTING_WIDTH: ObsString = obs_string!("width");
@@ -22,20 +23,35 @@ pub struct PuppetSource {
     path: Option<String>,
     camera_index: u8,
     show_features: bool,
-    rig: Option<Rig>,
+    render_thread: Option<thread::Thread>,
+}
+
+fn render_thread(rig_path: &Path) -> thread::Thread {
+    let rig_path = rig_path.to_owned();
+    thread::spawn(move || {
+        let rig = match Rig::open(rig_path.as_path()) {
+            Ok(r) => r,
+            Err(e) => {
+                error!("error loading rig: {}", e);
+                panic!("this should show an error message in OBS somehow");
+            }
+        };
+        dbg!(&rig);
+    })
+    .thread()
+    .to_owned()
 }
 
 impl PuppetSource {
-    fn reload_rig(&mut self) {
-        // XXX this should happen asyncronously, but i need to learn things first
-        self.rig = match &self.path {
-            Some(p) => match Rig::open(Path::new(p.as_str())) {
-                Ok(r) => Some(r),
-                Err(e) => {
-                    error!("failed to load rig: {}", e);
-                    None
-                }
-            },
+    fn kill_render_thread(&mut self) {
+        // this might need to send a signal to the render thread to end? the docs don't say what
+        // happens when a Thread object is dropped, only JoinHandle
+        self.render_thread = None;
+    }
+
+    fn spawn_render_thread(&mut self) {
+        self.render_thread = match &self.path {
+            Some(p) => Some(render_thread(Path::new(p.as_str()))),
             None => {
                 info!("path not set");
                 None
@@ -98,7 +114,7 @@ impl Sourceable for PuppetSource {
             path: None,
             camera_index: 0,
             show_features: false,
-            rig: None,
+            render_thread: None,
         };
         source.update_settings(&create.settings);
 
@@ -158,13 +174,13 @@ impl GetPropertiesSource for PuppetSource {
 impl ActivateSource for PuppetSource {
     fn activate(&mut self) {
         info!("activating...");
-        self.reload_rig();
+        self.spawn_render_thread();
     }
 }
 
 impl DeactivateSource for PuppetSource {
     fn deactivate(&mut self) {
-        self.rig = None
+        self.kill_render_thread();
     }
 }
 
