@@ -26,10 +26,7 @@ pub fn run_cli() {
         }
     });
 
-    window.render_loop(puppet::run_puppet(
-        &context,
-        options.path.as_path(),
-        report_rx,
-        control_tx,
-    ))
+    let rig = puppet::Rig::open(options.path.as_path()).unwrap();
+
+    window.render_loop(puppet::render(&context, report_rx, control_tx, rig))
 }
