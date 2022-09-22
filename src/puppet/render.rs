@@ -124,7 +124,7 @@ fn handle_input(frame_input: &FrameInput, control_tx: &Sender<ControlMessage>) {
 
 pub fn render(
     context: &Context,
-    tracking_rx: Receiver<TrackingReport>,
+    report_rx: Receiver<TrackingReport>,
     control_tx: Sender<ControlMessage>,
     rig: Rig,
 ) -> Box<dyn FnMut(FrameInput) -> FrameOutput> {
@@ -153,7 +153,8 @@ pub fn render(
         orbit_control.handle_events(&mut camera, &frame_input.events);
         handle_input(&frame_input, &control_tx);
 
-        let report = tracking_rx.recv().unwrap();
+        let report = report_rx.recv().unwrap();
+        dbg!(&report); // XXX remove
         let target = frame_input.screen();
 
         target.clear(ClearState::color_and_depth(0.0, 1.0, 0.0, 1.0, 1.0));

@@ -1,4 +1,5 @@
 use super::render_thread::{render_thread, RenderThread};
+use crate::options::Options;
 use log::info;
 use obs_wrapper::{
     data::DataObj,
@@ -34,7 +35,15 @@ impl PuppetSource {
 
     fn spawn_render_thread(&mut self) {
         self.render_thread = match &self.path {
-            Some(p) => Some(render_thread(Path::new(p.as_str()))),
+            Some(p) => Some(render_thread(
+                Options {
+                    path: Path::new(p).to_path_buf(),
+                    camera_index: self.camera_index,
+                    show_features: self.show_features,
+                },
+                self.get_width(),
+                self.get_height(),
+            )),
             None => {
                 info!("path not set");
                 None
