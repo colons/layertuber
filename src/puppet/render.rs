@@ -6,10 +6,9 @@ use core::ops::Mul;
 use log::info;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::Arc;
-use three_d::window::{Window, WindowSettings};
 use three_d::{
     degrees, vec3, Blend, Camera, ClearState, ColorMaterial, Context, CpuMesh, Event, FrameInput,
-    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, Texture2D, Vec3,
+    FrameOutput, Gm, Key, Mat4, Mesh, RenderStates, Texture2D, Vec3, Viewport,
 };
 
 struct RenderLayer {
@@ -123,17 +122,19 @@ fn handle_input(frame_input: &FrameInput, control_tx: &Sender<ControlMessage>) {
     }
 }
 
-pub fn render(tracking_rx: Receiver<TrackingReport>, control_tx: Sender<ControlMessage>, rig: Rig) {
-    let window = Window::new(WindowSettings {
-        title: "layertuber".to_string(),
-        ..Default::default()
-    })
-    .unwrap();
-
-    let context = window.gl();
-
+pub fn render(
+    context: &Context,
+    tracking_rx: Receiver<TrackingReport>,
+    control_tx: Sender<ControlMessage>,
+    rig: Rig,
+) -> Box<dyn FnMut(FrameInput) -> FrameOutput> {
     let mut camera = Camera::new_perspective(
-        window.viewport(),
+        Viewport {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+        },
         vec3(0.0, 0.0, 2.0),
         vec3(0.0, 0.0, 0.0),
         vec3(0.0, 1.0, 0.0),
@@ -146,7 +147,7 @@ pub fn render(tracking_rx: Receiver<TrackingReport>, control_tx: Sender<ControlM
 
     let mut render_layers: Vec<RenderLayer> = RenderLayer::from_rig(&rig, &context);
 
-    window.render_loop(move |frame_input: FrameInput| {
+    Box::new(move |frame_input: FrameInput| {
         camera.set_viewport(frame_input.viewport);
 
         orbit_control.handle_events(&mut camera, &frame_input.events);
@@ -168,5 +169,5 @@ pub fn render(tracking_rx: Receiver<TrackingReport>, control_tx: Sender<ControlM
         }
 
         FrameOutput::default()
-    });
+    })
 }
