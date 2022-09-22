@@ -1,4 +1,5 @@
 use crate::Options;
+use std::thread;
 use dirs::cache_dir;
 use lazy_static::lazy_static;
 use log::{error, info};
@@ -10,7 +11,7 @@ use std::io::{Read, Write};
 use std::mem::drop;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
-use std::sync::mpsc::Receiver;
+use std::sync::mpsc::{Receiver, sync_channel};
 use subprocess::{ExitStatus, Popen, PopenConfig, PopenError, Redirection};
 
 const NEWLINE: u8 = "\n".as_bytes()[0];
@@ -206,4 +207,15 @@ pub fn run_tracker(
     );
 
     Ok(tracker)
+}
+
+pub fn spawn_tracker(options: Options, control_rx: Receiver<ControlMessage>) -> (Receiver<TrackingReport>, thread::JoinHandle<()>) {
+    let (report_tx, report_rx) = sync_channel(0);
+    return (report_rx, thread::spawn(move || {
+        let tracker =
+            run_tracker(control_rx, &options).expect("could not start tracker");
+        for report in tracker {
+            report_tx.send(report).unwrap()
+        }
+    }));
 }
