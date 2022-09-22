@@ -21,8 +21,8 @@ lazy_static! {
 }
 
 pub struct TrackerOptions {
-    camera_index: u8,
-    show_features: bool,
+    pub camera_index: u8,
+    pub show_features: bool,
 }
 
 impl From<&Options> for TrackerOptions {

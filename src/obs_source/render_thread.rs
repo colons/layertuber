@@ -1,6 +1,6 @@
 use crate::{
     puppet::{render, Rig},
-    tracker::{spawn_tracker, ControlMessage},
+    tracker::{spawn_tracker, ControlMessage, TrackerOptions},
 };
 use log::error;
 use std::path::Path;
@@ -18,8 +18,16 @@ pub fn render_thread(rig_path: &Path) -> RenderThread {
     let rig_path = rig_path.to_owned();
 
     let (frame_tx, frame_rx) = sync_channel(0);
-    let (report_tx, report_rx) = sync_channel(0);
     let (control_tx, control_rx) = channel();
+
+    let (report_rx, _thread) = spawn_tracker(
+        TrackerOptions {
+            // XXX respect configuration
+            camera_index: 0,
+            show_features: false,
+        },
+        control_rx,
+    );
 
     RenderThread {
         control_tx: control_tx.clone(),
