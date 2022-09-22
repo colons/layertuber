@@ -1,4 +1,8 @@
-use crate::{puppet, tracker, Options};
+use crate::{
+    puppet,
+    tracker::{spawn_tracker, TrackerOptions},
+    Options,
+};
 use std::sync::mpsc::channel;
 use three_d::{Window, WindowSettings};
 
@@ -13,7 +17,7 @@ pub fn run_cli() {
     })
     .unwrap();
 
-    let (report_rx, _tracker_thread) = tracker::spawn_tracker(options.clone(), control_rx);
+    let (report_rx, _tracker_thread) = spawn_tracker(TrackerOptions::from(&options), control_rx);
 
     let context = window.gl();
 

@@ -1,4 +1,7 @@
-use crate::{puppet::{render, Rig}, tracker::ControlMessage};
+use crate::{
+    puppet::{render, Rig},
+    tracker::{spawn_tracker, ControlMessage},
+};
 use log::error;
 use std::path::Path;
 use std::sync::mpsc::{channel, sync_channel, Receiver, Sender};

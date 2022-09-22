@@ -1,5 +1,4 @@
 use crate::Options;
-use std::thread;
 use dirs::cache_dir;
 use lazy_static::lazy_static;
 use log::{error, info};
@@ -11,13 +10,28 @@ use std::io::{Read, Write};
 use std::mem::drop;
 use std::os::unix::fs::PermissionsExt;
 use std::path::PathBuf;
-use std::sync::mpsc::{Receiver, sync_channel};
+use std::sync::mpsc::{sync_channel, Receiver};
+use std::thread;
 use subprocess::{ExitStatus, Popen, PopenConfig, PopenError, Redirection};
 
 const NEWLINE: u8 = "\n".as_bytes()[0];
 
 lazy_static! {
     static ref TRACKER_BIN_PATH: PathBuf = cache_dir().unwrap().join("layertuber-tracker");
+}
+
+pub struct TrackerOptions {
+    camera_index: u8,
+    show_features: bool,
+}
+
+impl From<&Options> for TrackerOptions {
+    fn from(options: &Options) -> TrackerOptions {
+        TrackerOptions {
+            camera_index: options.camera_index,
+            show_features: options.show_features,
+        }
+    }
 }
 
 mod bin;
@@ -155,7 +169,7 @@ impl Iterator for FaceTracker {
 
 pub fn run_tracker(
     control_rx: Receiver<ControlMessage>,
-    options: &Options,
+    options: &TrackerOptions,
 ) -> Result<FaceTracker, RunTrackerError> {
     let mut tracker_bin = File::create(TRACKER_BIN_PATH.as_path())?;
 
@@ -209,13 +223,18 @@ pub fn run_tracker(
     Ok(tracker)
 }
 
-pub fn spawn_tracker(options: Options, control_rx: Receiver<ControlMessage>) -> (Receiver<TrackingReport>, thread::JoinHandle<()>) {
+pub fn spawn_tracker(
+    options: TrackerOptions,
+    control_rx: Receiver<ControlMessage>,
+) -> (Receiver<TrackingReport>, thread::JoinHandle<()>) {
     let (report_tx, report_rx) = sync_channel(0);
-    return (report_rx, thread::spawn(move || {
-        let tracker =
-            run_tracker(control_rx, &options).expect("could not start tracker");
-        for report in tracker {
-            report_tx.send(report).unwrap()
-        }
-    }));
+    return (
+        report_rx,
+        thread::spawn(move || {
+            let tracker = run_tracker(control_rx, &options).expect("could not start tracker");
+            for report in tracker {
+                report_tx.send(report).unwrap()
+            }
+        }),
+    );
 }
