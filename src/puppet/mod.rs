@@ -1,5 +1,5 @@
-pub use rig::Rig;
 pub use render::render;
+pub use rig::Rig;
 
 pub mod rig;
 
