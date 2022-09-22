@@ -24,6 +24,7 @@ mod report;
 
 pub enum ControlMessage {
     Calibrate,
+    Die,
 }
 
 #[derive(Debug)]
@@ -88,6 +89,9 @@ impl FaceTracker {
                         .unwrap()
                         .write_all("calibrate\n".as_bytes())
                         .unwrap();
+                }
+                ControlMessage::Die => {
+                    panic!("this should quit gracefully")
                 }
             }
         }
