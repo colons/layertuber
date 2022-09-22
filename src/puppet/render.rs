@@ -123,7 +123,7 @@ fn handle_input(frame_input: &FrameInput, control_tx: &Sender<ControlMessage>) {
 }
 
 pub fn render(
-    context: &Context,
+    context: Context,
     report_rx: Receiver<TrackingReport>,
     control_tx: Sender<ControlMessage>,
     rig: Rig,
@@ -145,7 +145,7 @@ pub fn render(
 
     let mut orbit_control = ScaledOrbitControl::new(*camera.target(), 1.0, 3.0, 0.02);
 
-    let mut render_layers: Vec<RenderLayer> = RenderLayer::from_rig(&rig, context);
+    let mut render_layers: Vec<RenderLayer> = RenderLayer::from_rig(&rig, &context);
 
     Box::new(move |frame_input: FrameInput| {
         camera.set_viewport(frame_input.viewport);

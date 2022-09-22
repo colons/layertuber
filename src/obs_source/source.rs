@@ -11,7 +11,7 @@ use obs_wrapper::{
 };
 use std::borrow::Cow;
 use std::path::Path;
-use three_d::{FrameInput, FrameOutput, HeadlessContext, Viewport};
+use three_d::{Context, FrameInput, FrameOutput, HeadlessContext, Viewport};
 
 const SETTING_PATH: ObsString = obs_string!("path");
 const SETTING_WIDTH: ObsString = obs_string!("width");
@@ -24,7 +24,7 @@ pub struct PuppetSource {
     path: Option<String>,
     camera_index: u8,
     show_features: bool,
-    context: HeadlessContext,
+    context: Context,
     render: Option<Box<dyn FnMut(FrameInput) -> FrameOutput>>,
 }
 
@@ -35,13 +35,14 @@ impl PuppetSource {
 
     fn start_rendering(&mut self) {
         self.render = match &self.path {
-            Some(p) => {
-                Some(create_renderer(self.context.clone(), Options {
+            Some(p) => Some(create_renderer(
+                self.context.clone(),
+                Options {
                     path: Path::new(p).to_path_buf(),
                     camera_index: self.camera_index,
                     show_features: self.show_features,
-                }))
-            }
+                },
+            )),
             None => {
                 info!("path not set");
                 None
@@ -77,13 +78,13 @@ impl PuppetSource {
             Some(r) => r,
             None => {
                 info!("render not active");
-                return
+                return;
             }
         };
 
         let input = FrameInput {
             events: Vec::new(),
-            context: (*self.context).clone(),
+            context: self.context.clone(),
             viewport: Viewport {
                 x: 0,
                 y: 0,
@@ -132,13 +133,14 @@ impl Sourceable for PuppetSource {
     }
 
     fn create(create: &mut CreatableSourceContext<Self>, _source: SourceContext) -> Self {
+        let context = HeadlessContext::new().unwrap();
         let mut source = PuppetSource {
             tex: GraphicsTexture::new(100, 100, GraphicsColorFormat::RGBA),
             path: None,
             camera_index: 0,
             show_features: false,
             render: None,
-            context: HeadlessContext::new().unwrap(),
+            context: (*context).clone(),
         };
         source.update_settings(&create.settings);
 
@@ -238,5 +240,3 @@ impl GetNameSource for PuppetSource {
         obs_string!("layertuber puppet")
     }
 }
-
-

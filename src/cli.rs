@@ -23,5 +23,5 @@ pub fn run_cli() {
 
     let rig = puppet::Rig::open(options.path.as_path()).unwrap();
 
-    window.render_loop(puppet::render(&context, report_rx, control_tx, rig))
+    window.render_loop(puppet::render(context, report_rx, control_tx, rig))
 }

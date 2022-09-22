@@ -5,10 +5,10 @@ use crate::{
 };
 use log::error;
 use std::sync::mpsc::channel;
-use three_d::{FrameInput, FrameOutput, HeadlessContext};
+use three_d::{Context, FrameInput, FrameOutput};
 
 pub fn create_renderer(
-    context: HeadlessContext,
+    context: Context,
     options: Options,
 ) -> Box<dyn FnMut(FrameInput) -> FrameOutput> {
     let (control_tx, control_rx) = channel();
@@ -25,5 +25,5 @@ pub fn create_renderer(
         }
     };
 
-    render(&*context, report_rx, control_tx, rig)
+    render(context, report_rx, control_tx, rig)
 }
