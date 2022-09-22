@@ -1,4 +1,4 @@
 pub use self::source::*;
 
-mod render_thread;
+mod render;
 mod source;

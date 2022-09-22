@@ -228,7 +228,7 @@ pub fn spawn_tracker(
     control_rx: Receiver<ControlMessage>,
 ) -> (Receiver<TrackingReport>, thread::JoinHandle<()>) {
     let (report_tx, report_rx) = sync_channel(0);
-    return (
+    (
         report_rx,
         thread::spawn(move || {
             let tracker = run_tracker(control_rx, &options).expect("could not start tracker");
@@ -236,5 +236,5 @@ pub fn spawn_tracker(
                 report_tx.send(report).unwrap()
             }
         }),
-    );
+    )
 }

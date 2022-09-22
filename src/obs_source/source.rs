@@ -1,4 +1,4 @@
-use super::render_thread::{render_thread, RenderThread};
+use super::render::create_renderer;
 use crate::options::Options;
 use log::info;
 use obs_wrapper::{
@@ -11,6 +11,7 @@ use obs_wrapper::{
 };
 use std::borrow::Cow;
 use std::path::Path;
+use three_d::{FrameInput, FrameOutput, HeadlessContext, Viewport};
 
 const SETTING_PATH: ObsString = obs_string!("path");
 const SETTING_WIDTH: ObsString = obs_string!("width");
@@ -23,27 +24,24 @@ pub struct PuppetSource {
     path: Option<String>,
     camera_index: u8,
     show_features: bool,
-    render_thread: Option<RenderThread>,
+    context: HeadlessContext,
+    render: Option<Box<dyn FnMut(FrameInput) -> FrameOutput>>,
 }
 
 impl PuppetSource {
-    fn kill_render_thread(&mut self) {
-        // this might need to send a signal to the render thread to end? the docs don't say what
-        // happens when a Thread object is dropped, only JoinHandle
-        self.render_thread = None;
+    fn end_rendering(&mut self) {
+        self.render = None;
     }
 
-    fn spawn_render_thread(&mut self) {
-        self.render_thread = match &self.path {
-            Some(p) => Some(render_thread(
-                Options {
+    fn start_rendering(&mut self) {
+        self.render = match &self.path {
+            Some(p) => {
+                Some(create_renderer(self.context.clone(), Options {
                     path: Path::new(p).to_path_buf(),
                     camera_index: self.camera_index,
                     show_features: self.show_features,
-                },
-                self.get_width(),
-                self.get_height(),
-            )),
+                }))
+            }
             None => {
                 info!("path not set");
                 None
@@ -69,10 +67,43 @@ impl PuppetSource {
             self.show_features = show_features
         }
 
-        self.render();
+        self.render_one_frame();
     }
 
-    fn render(&mut self) {
+    fn render_one_frame(&mut self) {
+        let width = self.get_width();
+        let height = self.get_height();
+        let render = match &mut self.render {
+            Some(r) => r,
+            None => {
+                info!("render not active");
+                return
+            }
+        };
+
+        let input = FrameInput {
+            events: Vec::new(),
+            context: (*self.context).clone(),
+            viewport: Viewport {
+                x: 0,
+                y: 0,
+                width,
+                height,
+            },
+            window_width: width,
+            window_height: height,
+            device_pixel_ratio: 1.0,
+
+            // some naive defaults:
+            first_frame: false,
+            elapsed_time: 0.0,
+            accumulated_time: 0.0,
+        };
+
+        let output = render(input);
+        dbg!(&output);
+
+        // bad, old implementation:
         let mut pixels = Vec::new();
 
         for row in 0..self.tex.height() {
@@ -106,7 +137,8 @@ impl Sourceable for PuppetSource {
             path: None,
             camera_index: 0,
             show_features: false,
-            render_thread: None,
+            render: None,
+            context: HeadlessContext::new().unwrap(),
         };
         source.update_settings(&create.settings);
 
@@ -166,13 +198,13 @@ impl GetPropertiesSource for PuppetSource {
 impl ActivateSource for PuppetSource {
     fn activate(&mut self) {
         info!("activating...");
-        self.spawn_render_thread();
+        self.start_rendering();
     }
 }
 
 impl DeactivateSource for PuppetSource {
     fn deactivate(&mut self) {
-        self.kill_render_thread();
+        self.end_rendering();
     }
 }
 
@@ -206,3 +238,5 @@ impl GetNameSource for PuppetSource {
         obs_string!("layertuber puppet")
     }
 }
+
+
